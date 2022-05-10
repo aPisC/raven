@@ -1,0 +1,11 @@
+{
+  "name": "citrine",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/node-citrine/citrine.git",
+  "author": "Bendeguz Cseresnyes <cser.bende@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "echo done"
+  }
+}
