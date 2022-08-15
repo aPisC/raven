@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "citrine": "*"
+  }
+}
