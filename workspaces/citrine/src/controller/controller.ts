@@ -1,8 +1,9 @@
-import Router from 'koa-router';
-import 'reflect-metadata';
-import Koa from 'koa';
-import { kebabize } from '../../utils/kebabize';
-
+import Koa from "koa";
+import Router from "koa-router";
+import "reflect-metadata";
+import { RoutingDefinition } from "../routing/routing.types";
+import { kebabize } from "../utils/kebabize";
+import { ControllerSymbols } from "./coltroller.symbols";
 
 export class Controller {
   public __router: Router;
@@ -13,7 +14,8 @@ export class Controller {
       prefix: this.resolveControllerPath(),
     };
     const overrideRouterOptions: Router.IRouterOptions =
-      Reflect.getMetadata(Symbols.routerOptions, this.constructor) || {};
+      Reflect.getMetadata(ControllerSymbols.routerOptions, this.constructor) ||
+      {};
     const routerOptions = {
       ...defaultRouterOptions,
       ...overrideRouterOptions,
@@ -23,16 +25,17 @@ export class Controller {
     this.__router = new Router(routerOptions);
 
     // Apply controller middlewares
-    const middlewares: Koa.Middleware[] = Reflect.getMetadata(Symbols.middlewares, this) || [];
+    const middlewares: Koa.Middleware[] =
+      Reflect.getMetadata(ControllerSymbols.middlewares, this) || [];
     middlewares.forEach((m) => this.__router.use(m));
 
     // Apply Return value middleware
-    this.__router.use(ReturnJson);
+    //this.__router.use(ReturnJson);
 
     // Apply routes
-    const routes: RouteDefinition[] = Reflect.getMetadata(Symbols.routes, this) || [];
+    const routes: RoutingDefinition[] =
+      Reflect.getMetadata(ControllerSymbols.routes, this) || [];
     routes.forEach((r) => {
-
       this.__router[r.method](r.path, (ctx, next: any) => {
         //const args: any[] = mappers.map((m) => m && m(ctx, next));
         //validators.forEach((v) => v(...args, ctx, next));
@@ -43,7 +46,7 @@ export class Controller {
 
   private resolveControllerPath() {
     let name = this.constructor.name;
-    if (name.endsWith('Controller')) name = name.substring(0, name.length - 10);
+    if (name.endsWith("Controller")) name = name.substring(0, name.length - 10);
     return `/${kebabize(name)}`;
   }
 }
