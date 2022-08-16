@@ -3,8 +3,8 @@ import { createRouter } from "./createRouter";
 import { decorateRoute } from "./decorateRoute";
 import { getConfig } from "./getConfig";
 import { getRoutes } from "./getRoutes";
-import { setConfig } from "./setConfig";
 import { HttpMethod } from "./types";
+import { updateConfig } from "./updateConfig";
 
 export const Route = {
   // Method decorators
@@ -15,7 +15,7 @@ export const Route = {
 
   // Config decorators
   Prefix: (path: string) => (target: Function) =>
-    setConfig(target.prototype, "prefix", path),
+    updateConfig(target.prototype, { prefix: path }),
 
   // Helper functions
   AddRoute: (
@@ -25,7 +25,7 @@ export const Route = {
     handler: () => any
   ) => addRoute(controller, method, path, handler),
   GetRoutes: getRoutes,
-  SetConfig: setConfig,
+  Configure: updateConfig,
   GetConfig: getConfig,
   CreateRouter: createRouter,
   Decorate: decorateRoute,
