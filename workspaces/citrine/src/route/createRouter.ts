@@ -1,14 +1,11 @@
 import Router from "koa-router";
-import { kebabize } from "../utils/kebabize";
 import { Route } from "./route";
 
 export function createRouter(controller: Object): Router {
-  const defaultRouterOptions = createDefaultConfiguration(controller);
+  const config = Route.GetConfig(controller);
   const routes = Route.GetRoutes(controller);
 
-  console.log(routes);
-
-  const router = new Router(defaultRouterOptions);
+  const router = new Router(config);
 
   routes.forEach((route) => {
     switch (typeof route.handler) {
@@ -24,16 +21,4 @@ export function createRouter(controller: Object): Router {
   });
 
   return router;
-}
-
-function createDefaultConfiguration(controller: Object): Router.IRouterOptions {
-  return {
-    //prefix: "/", //`/${resolveControllerPath(controller)}`,
-  };
-}
-
-function resolveControllerPath(controller: Object) {
-  let name = controller.constructor.name;
-  if (name.endsWith("Controller")) name = name.substring(0, name.length - 10);
-  return `/${kebabize(name)}`;
 }

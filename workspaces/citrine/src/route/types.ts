@@ -5,3 +5,7 @@ export interface RoutingDefinition {
   handler: string | symbol | (() => any);
   path: string;
 }
+
+export interface RoutingConfig {
+  prefix?: string;
+}

@@ -1,5 +1,5 @@
-import { getRoutes } from "./getRoutes";
-import { HttpMethod } from "./types";
+import { RoutesSymbol } from "./symbols";
+import { HttpMethod, RoutingDefinition } from "./types";
 
 export function addRoute(
   target: Object,
@@ -7,11 +7,17 @@ export function addRoute(
   path: string,
   handler: string | symbol | (() => any)
 ) {
-  const routes = getRoutes(target);
+  const routes: RoutingDefinition[] =
+    Reflect.getMetadata(RoutesSymbol, target) || [];
 
-  routes.push({
-    path,
-    method,
-    handler: handler,
-  });
+  const newRoutes = [
+    ...routes,
+    {
+      path,
+      method,
+      handler: handler,
+    },
+  ];
+
+  Reflect.defineMetadata(RoutesSymbol, newRoutes, target);
 }

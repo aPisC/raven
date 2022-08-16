@@ -11,6 +11,7 @@ export function decorateRoute(
     descriptor: TypedPropertyDescriptor<T>
   ): void {
     if (!path) path = `/${String(propertyKey)}`;
+    console.log("addRoute", target);
     addRoute(target, method, path, propertyKey);
   };
 }
