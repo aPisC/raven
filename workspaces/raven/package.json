@@ -1,9 +1,9 @@
 {
-  "name": "citrine",
+  "name": "raven",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/node-citrine/citrine.git",
+  "repository": "https://github.com/aPisC/raven.git",
   "author": "Bendeguz Cseresnyes <cser.bende@gmail.com>",
   "license": "MIT",
   "scripts": {

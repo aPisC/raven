@@ -1,4 +1,4 @@
-import { Route } from "citrine";
+import { Route } from "raven";
 
 @Route.Prefix("/test")
 export default class TestController {

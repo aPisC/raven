@@ -8,7 +8,7 @@ import { Route } from "../route/route";
 
 const ControllerSymbol: unique symbol = Symbol();
 
-export class Citrine {
+export class Raven {
   public config: any = {};
 
   public readonly dependencyContainer =

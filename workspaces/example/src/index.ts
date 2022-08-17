@@ -1,7 +1,7 @@
-import { Citrine } from "citrine";
+import { Raven } from "raven";
 import TestController from "./api/TestController";
 
-const server = new Citrine();
+const server = new Raven();
 
 server.config.port = 3000;
 
