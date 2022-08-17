@@ -1,4 +1,6 @@
+import { Context, Next } from "koa";
 import Router from "koa-router";
+import { getAnnotations } from "./getAnnotations";
 import { Route } from "./route";
 
 export function createRouter(controller: Object): Router {
@@ -8,16 +10,26 @@ export function createRouter(controller: Object): Router {
   const router = new Router(config);
 
   routes.forEach((route) => {
-    switch (typeof route.handler) {
-      case "function":
-        router[route.method](route.path, route.handler as () => any);
-        break;
-      default:
-        router[route.method](route.path, (ctx) =>
-          (controller as any)[route.handler as string](ctx)
-        );
-        break;
-    }
+    const handler =
+      typeof route.handler == "function"
+        ? (route.handler as (ctx: Context) => any)
+        : (ctx: Context) => (controller as any)[route.handler as string](ctx);
+
+    const endpointAnnotations =
+      typeof route.handler == "function"
+        ? {}
+        : getAnnotations(controller, route.handler);
+
+    const endpoint = {
+      annotations: endpointAnnotations,
+      controller: controller,
+      handler: handler,
+    };
+
+    router[route.method](route.path, (ctx: Context, next: Next) => {
+      ctx.endpoint = endpoint;
+      return next();
+    });
   });
 
   return router;

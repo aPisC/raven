@@ -1,4 +1,5 @@
 import { addRoute } from "./addRoute";
+import { annotateEndpoint } from "./annotateEndpoint";
 import { createRouter } from "./createRouter";
 import { decorateRoute } from "./decorateRoute";
 import { getConfig } from "./getConfig";
@@ -18,6 +19,7 @@ export const Route = {
     updateConfig(target.prototype, { prefix: path }),
 
   // Helper functions
+  Annotate: annotateEndpoint,
   AddRoute: (
     controller: Object,
     method: HttpMethod,
