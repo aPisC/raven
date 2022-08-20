@@ -1,11 +1,17 @@
 import "reflect-metadata";
 
 import { createServer } from "http";
-import Koa, { Middleware } from "koa";
+import Koa from "koa";
 import Router from "koa-router";
-import { container as globalDependencyContainer } from "tsyringe";
+import {
+  container as globalDependencyContainer,
+  FactoryProvider,
+  ValueProvider,
+} from "tsyringe";
 import { constructor } from "tsyringe/dist/typings/types";
-import { ExecuteEndpointMiddleware } from "../middlewares/executeEndpointMiddleware";
+import { ExecuteEndpointMiddleware } from "../middleware/executeEndpointMiddleware";
+import { KoaMiddleware } from "../middleware/koaMiddleware";
+import { Middleware } from "../middleware/middleware";
 import { Route } from "../route/route";
 
 const ControllerSymbol: unique symbol = Symbol();
@@ -13,15 +19,32 @@ const ControllerSymbol: unique symbol = Symbol();
 export class Raven {
   public config: any = {};
 
-  private readonly middlewares: Middleware[] = [];
+  private readonly middlewares: symbol[] = [];
 
   public readonly dependencyContainer =
     globalDependencyContainer.createChildContainer();
 
-  constructor() {}
+  constructor() {
+    this.dependencyContainer.registerInstance(Raven, this);
+  }
 
-  useMiddleware(middleware: Middleware) {
-    this.middlewares.push(middleware);
+  useKoaMiddleware(middleware: KoaMiddleware) {
+    const middlewareSymbol = Symbol();
+
+    this.dependencyContainer.register(middlewareSymbol, {
+      useValue: middleware,
+    });
+    this.middlewares.push(middlewareSymbol);
+  }
+
+  useMiddleware(middleware: constructor<Middleware>): void;
+  useMiddleware(middleware: ValueProvider<Middleware>): void;
+  useMiddleware(middleware: FactoryProvider<Middleware>): void;
+  useMiddleware(middleware: any) {
+    const middlewareSymbol = Symbol();
+
+    this.dependencyContainer.register(middlewareSymbol, middleware);
+    this.middlewares.push(middlewareSymbol);
   }
 
   start() {
@@ -39,7 +62,14 @@ export class Raven {
 
     // Register middlewares
     koa.use(router.routes());
-    this.middlewares.forEach((middleware) => koa.use(middleware));
+    this.middlewares.forEach((middlewareSymbol) => {
+      const middleware = this.dependencyContainer.resolve<
+        Middleware | KoaMiddleware
+      >(middlewareSymbol);
+      const handler =
+        typeof middleware === "function" ? middleware : middleware.handler;
+      koa.use(handler);
+    });
     koa.use(ExecuteEndpointMiddleware);
 
     // Starting http server
