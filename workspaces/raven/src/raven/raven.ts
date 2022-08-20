@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import { createServer } from "http";
-import Koa, { Context, Next } from "koa";
+import Koa, { Middleware } from "koa";
 import Router from "koa-router";
 import { container as globalDependencyContainer } from "tsyringe";
 import { constructor } from "tsyringe/dist/typings/types";
@@ -13,10 +13,16 @@ const ControllerSymbol: unique symbol = Symbol();
 export class Raven {
   public config: any = {};
 
+  private readonly middlewares: Middleware[] = [];
+
   public readonly dependencyContainer =
     globalDependencyContainer.createChildContainer();
 
   constructor() {}
+
+  useMiddleware(middleware: Middleware) {
+    this.middlewares.push(middleware);
+  }
 
   start() {
     // Registering controllers
@@ -30,11 +36,10 @@ export class Raven {
 
     // Creating koa server
     const koa = new Koa();
+
+    // Register middlewares
     koa.use(router.routes());
-    koa.use((ctx: Context, next: Next) => {
-      console.log("endpoint", ctx.endpoint);
-      return next();
-    });
+    this.middlewares.forEach((middleware) => koa.use(middleware));
     koa.use(ExecuteEndpointMiddleware);
 
     // Starting http server
