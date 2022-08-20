@@ -12,6 +12,7 @@ import { constructor } from "tsyringe/dist/typings/types";
 import { ExecuteEndpointMiddleware } from "../middleware/executeEndpointMiddleware";
 import { KoaMiddleware } from "../middleware/koaMiddleware";
 import { Middleware } from "../middleware/middleware";
+import { Plugin } from "../plugin/plugin";
 import { Route } from "../route/route";
 
 const ControllerSymbol: unique symbol = Symbol();
@@ -26,6 +27,27 @@ export class Raven {
 
   constructor() {
     this.dependencyContainer.registerInstance(Raven, this);
+  }
+
+  usePlugin(plugin: constructor<Plugin> | string) {
+    if (typeof plugin === "string") {
+      const pluginName = plugin;
+      const pluginModule = require(plugin);
+      plugin =
+        typeof pluginModule === "function"
+          ? pluginModule
+          : pluginModule.default;
+
+      if (typeof plugin !== "function")
+        throw new Error(`Plugin ${pluginName} could not be loaded`);
+    }
+
+    this.dependencyContainer.register(plugin, plugin);
+    const pluginInstance = this.dependencyContainer.resolve(plugin);
+    if (!(pluginInstance instanceof Plugin))
+      throw new Error(`Unable to instantiate plugin`);
+
+    pluginInstance.initialize(this);
   }
 
   useKoaMiddleware(middleware: KoaMiddleware) {
