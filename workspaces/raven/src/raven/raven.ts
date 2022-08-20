@@ -29,24 +29,41 @@ export class Raven {
     this.dependencyContainer.registerInstance(Raven, this);
   }
 
-  usePlugin(plugin: constructor<Plugin> | string) {
+  usePlugin(plugin: Plugin | constructor<Plugin> | string) {
+    let pluginName: string;
+    let pluginConstruct: constructor<Plugin>;
+    let pluginInstance: Plugin | null = null;
+
     if (typeof plugin === "string") {
-      const pluginName = plugin;
+      pluginName = plugin;
       const pluginModule = require(plugin);
       plugin =
         typeof pluginModule === "function"
           ? pluginModule
           : pluginModule.default;
-
-      if (typeof plugin !== "function")
-        throw new Error(`Plugin ${pluginName} could not be loaded`);
     }
 
-    this.dependencyContainer.register(plugin, plugin);
-    const pluginInstance = this.dependencyContainer.resolve(plugin);
+    if (typeof plugin === "object") {
+      pluginInstance = plugin;
+      pluginConstruct = plugin.constructor as constructor<Plugin>;
+      pluginName ??= pluginConstruct.name;
+    } else if (typeof plugin === "function") {
+      pluginConstruct = plugin;
+      pluginName ??= pluginConstruct.name;
+    } else {
+      throw new Error("Unable to resolve plugin");
+    }
+
+    if (this.dependencyContainer.isRegistered(pluginConstruct, true))
+      throw new Error("Plugin is already registered");
+
+    if (!pluginInstance)
+      pluginInstance = this.dependencyContainer.resolve(pluginConstruct);
+
     if (!(pluginInstance instanceof Plugin))
       throw new Error(`Unable to instantiate plugin`);
 
+    this.dependencyContainer.registerInstance(pluginConstruct, pluginInstance);
     pluginInstance.initialize(this);
   }
 

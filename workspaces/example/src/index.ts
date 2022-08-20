@@ -1,8 +1,9 @@
 import { Context, Next } from "koa";
-import { Plugin, Raven } from "raven";
-import { Middleware } from "raven/dist/middleware/middleware";
+import { Middleware, Plugin, Raven } from "raven";
+import { autoInjectable } from "tsyringe";
 import TestController from "./api/TestController";
 
+@autoInjectable()
 class TestPlugin extends Plugin {
   initialize(raven: Raven): void {
     raven.addController(TestController);
