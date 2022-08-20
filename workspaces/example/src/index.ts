@@ -21,4 +21,5 @@ class TestPlugin extends Plugin {
 const server = new Raven();
 server.config.port = 3000;
 server.usePlugin(TestPlugin);
+server.usePlugin("raven-plugin-auth");
 server.start();

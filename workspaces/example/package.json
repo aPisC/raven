@@ -8,7 +8,8 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "raven": "*"
+    "raven": "*",
+    "raven-plugin-auth": "*"
   },
   "devDependencies": {
     "nodemon": "^2.0.19",
