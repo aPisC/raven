@@ -1,8 +1,14 @@
 import { AnnotationsSymbol } from "./symbols";
 
-export function getAnnotations(target: Object, endpoint: string | symbol) {
-  const annotations: any =
-    Reflect.getMetadata(AnnotationsSymbol, target, endpoint) || {};
+export function getAnnotations(
+  target: Object | Function,
+  endpoint?: string | symbol
+) {
+  if (typeof target === "function") target = target.prototype;
 
-  return annotations;
+  const annotations: any = endpoint
+    ? Reflect.getMetadata(AnnotationsSymbol, target, endpoint)
+    : Reflect.getMetadata(AnnotationsSymbol, target);
+
+  return annotations || {};
 }

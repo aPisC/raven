@@ -32,13 +32,15 @@ function createEndpointData(
       ? (route.handler as (ctx: Context) => any)
       : (ctx: Context) => (controller as any)[route.handler as string](ctx);
 
+  const controllerAnnotations = getAnnotations(controller);
+
   const endpointAnnotations =
     typeof route.handler == "function"
       ? {}
       : getAnnotations(controller, route.handler);
 
   const endpoint = {
-    annotations: endpointAnnotations,
+    annotations: { ...controllerAnnotations, ...endpointAnnotations },
     route: `${config.prefix}${route.path}`.replace(/(.)\/$/, "$1"),
     handler: typeof route.handler == "function" ? undefined : route.handler,
     name:

@@ -1,20 +1,29 @@
 import { AnnotationsSymbol } from "./symbols";
 
-export function annotateEndpoint<T extends Object>(
+export function annotateEndpoint(
   annotationKey: string | symbol,
   annotationValue: any
-): MethodDecorator {
-  return (target, propertyKey) => {
-    const annotations: any =
-      Reflect.getMetadata(AnnotationsSymbol, target, propertyKey) || {};
+): ClassDecorator & MethodDecorator {
+  return (target: Object | Function, propertyKey?: string | symbol) => {
+    if (typeof target === "function") target = target.prototype;
 
-    const newAnnotations = { ...annotations, [annotationKey]: annotationValue };
+    let annotations: any = propertyKey
+      ? Reflect.getMetadata(AnnotationsSymbol, target, propertyKey)
+      : Reflect.getMetadata(AnnotationsSymbol, target);
+    annotations ??= {};
 
-    Reflect.defineMetadata(
-      AnnotationsSymbol,
-      newAnnotations,
-      target,
-      propertyKey
-    );
+    const newAnnotations = {
+      ...annotations,
+      [annotationKey]: annotationValue,
+    };
+
+    if (propertyKey)
+      Reflect.defineMetadata(
+        AnnotationsSymbol,
+        newAnnotations,
+        target,
+        propertyKey
+      );
+    else Reflect.defineMetadata(AnnotationsSymbol, newAnnotations, target);
   };
 }
