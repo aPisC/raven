@@ -21,6 +21,7 @@ import { KoaMiddleware } from "../middleware/koaMiddleware";
 import { Middleware } from "../middleware/middleware";
 import { Plugin } from "../plugin/plugin";
 import { Route } from "../route/route";
+import { RavenLoader, RavenLoaderConfig } from "./loader";
 
 export class Raven {
   // Dependency injection symbols
@@ -141,6 +142,11 @@ export class Raven {
 
   getRepository<M extends Model>(model: ModelCtor<M>): Repository<M> {
     return this.sequelize.getRepository(model);
+  }
+
+  loadFiles(config: RavenLoaderConfig) {
+    const loader = new RavenLoader();
+    loader.load(this, config);
   }
 
   async start() {

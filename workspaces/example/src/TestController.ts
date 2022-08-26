@@ -1,7 +1,7 @@
 import { Route } from "raven";
 import { Repository, Sequelize } from "sequelize-typescript";
 import { injectable } from "tsyringe";
-import { TestModel } from "./TestModel";
+import TestModel from "./TestModel";
 
 @Route.Prefix("/test")
 @Route.Annotate("key", "value")
