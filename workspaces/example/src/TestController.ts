@@ -1,9 +1,11 @@
 import { Route } from "raven";
 import { Repository, Sequelize } from "sequelize-typescript";
+import { injectable } from "tsyringe";
 import { TestModel } from "./TestModel";
 
 @Route.Prefix("/test")
 @Route.Annotate("key", "value")
+@injectable()
 export default class TestController {
   private model: Repository<TestModel>;
 
@@ -20,6 +22,8 @@ export default class TestController {
 
   @Route.Get("/model")
   async useModel(): Promise<TestModel | null> {
-    return await this.model.findOne();
+    const entry = await this.model.findOne();
+    console.log(entry);
+    return entry;
   }
 }

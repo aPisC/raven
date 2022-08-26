@@ -2,6 +2,7 @@ import { Context, Next } from "koa";
 import { Middleware, Plugin, Raven } from "raven";
 import { autoInjectable } from "tsyringe";
 import TestController from "./TestController";
+import { TestModel } from "./TestModel";
 
 @autoInjectable()
 class TestPlugin extends Plugin {
@@ -21,5 +22,6 @@ class TestPlugin extends Plugin {
 const server = new Raven();
 server.config.port = 3000;
 server.usePlugin(TestPlugin);
-server.usePlugin("raven-plugin-auth");
+server.addModel(TestModel);
+//server.usePlugin("raven-plugin-auth");
 server.start();

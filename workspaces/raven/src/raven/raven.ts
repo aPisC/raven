@@ -22,6 +22,7 @@ const ModelSymbol: unique symbol = Symbol();
 export class Raven {
   public config: any = {};
 
+  private _sequelize?: Sequelize;
   private readonly middlewares: symbol[] = [];
 
   public readonly dependencyContainer =
@@ -29,6 +30,14 @@ export class Raven {
 
   constructor() {
     this.dependencyContainer.registerInstance(Raven, this);
+    this.dependencyContainer.register(Sequelize, {
+      useFactory: () => this.sequelize,
+    });
+  }
+
+  public get sequelize() {
+    if (!this._sequelize) throw new Error("Sequelize is not initialized");
+    return this._sequelize;
   }
 
   usePlugin(plugin: Plugin | constructor<Plugin> | string) {
@@ -92,11 +101,28 @@ export class Raven {
     this.dependencyContainer.register(ControllerSymbol, controller);
   }
 
-  getRepository<M extends Model>(model: ModelCtor<M>): Repository<M> {
-    throw new Error("Not implemented");
+  addModel(model: typeof Model) {
+    this.dependencyContainer.register(ModelSymbol, { useValue: model });
   }
 
-  start() {
+  getRepository<M extends Model>(model: ModelCtor<M>): Repository<M> {
+    return this.sequelize.getRepository(model);
+  }
+
+  async start() {
+    // Initialize Sequelize
+    const models = this.dependencyContainer.isRegistered(ModelSymbol)
+      ? this.dependencyContainer.resolveAll<ModelCtor>(ModelSymbol)
+      : [];
+    const sequelize = new Sequelize({
+      dialect: "sqlite",
+      storage: ":memory:",
+      repositoryMode: true,
+      models: models,
+    });
+    await sequelize.sync();
+    this._sequelize = sequelize;
+
     // Registering controllers
     const router = new Router();
     const controllers = this.dependencyContainer.isRegistered(ControllerSymbol)
@@ -126,15 +152,5 @@ export class Raven {
     const httpServer = createServer(koa.callback());
     httpServer.listen(this.config.port);
     console.log("Server started", httpServer.address());
-
-    // Initialize Sequelize
-    const models = this.dependencyContainer.isRegistered(ModelSymbol)
-      ? this.dependencyContainer.resolveAll<ModelCtor>(ModelSymbol)
-      : [];
-    const sequelize = new Sequelize({
-      repositoryMode: true,
-      models: models,
-    });
-    sequelize.getRepository;
   }
 }

@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "raven": "*",
-    "raven-plugin-auth": "*"
+    "raven-plugin-auth": "*",
+    "sqlite3": "^5.0.11"
   },
   "devDependencies": {
     "nodemon": "^2.0.19",
