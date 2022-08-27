@@ -1,15 +1,18 @@
 import { Context, Next } from 'koa'
-import { ValidationSymbol } from './createAnnotation'
+import { Raven } from '../raven/raven'
+import { ValidationSymbol, ValidatorFn } from './createAnnotation'
 
-export async function ValidateMiddleware(ctx: Context, next: Next) {
-  const validators = ctx.endpoint?.annotations?.[ValidationSymbol] || []
+export function ValidateMiddleware(raven: Raven) {
+  return async (ctx: Context, next: Next) => {
+    const validators: ValidatorFn[] = ctx.endpoint?.annotations?.[ValidationSymbol] || []
 
-  for (const validator of validators) {
-    try {
-      await validator(ctx)
-    } catch (err) {
-      throw ctx.throw(400, err as Error)
+    for (const validator of validators) {
+      try {
+        await validator(ctx, raven)
+      } catch (err) {
+        throw ctx.throw(400, err as Error)
+      }
     }
+    return await next()
   }
-  return await next()
 }

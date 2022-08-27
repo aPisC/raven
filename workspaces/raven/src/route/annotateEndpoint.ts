@@ -3,7 +3,7 @@ import { AnnotationsSymbol } from './symbols'
 export function annotateEndpoint(
   annotationKey: string | symbol,
   annotationValue: ((current: any) => any) | any
-): ClassDecorator & MethodDecorator {
+): (target: Object | Function, propertyKey?: string | symbol) => void {
   return (target: Object | Function, propertyKey?: string | symbol) => {
     if (typeof target === 'function') target = target.prototype
 

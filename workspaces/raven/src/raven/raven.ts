@@ -200,7 +200,7 @@ export class Raven {
     resolvedMiddlewares
       .filter(({ priority }) => priority === MiddlewarePriority.PreExecute)
       .forEach(({ handler }) => koa.use(handler))
-    koa.use(ValidateMiddleware)
+    koa.use(ValidateMiddleware(this))
     koa.use(ExecuteEndpointMiddleware)
 
     // Starting http server
