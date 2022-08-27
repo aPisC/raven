@@ -20,8 +20,8 @@ const server = new Raven();
 server.config.port = 3000;
 server.loadFiles({
   root: __dirname,
-  controllers: ["*Controller.ts"],
-  models: ["*Model.ts"],
+  controllers: ["controllers/*.ts"],
+  models: ["models/*.ts"],
 });
 //server.usePlugin("raven-plugin-auth");
 server.start();

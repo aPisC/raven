@@ -1,6 +1,12 @@
 {
   "private": true,
+  "scripts": {
+    "dev": "concurrently -i -k -r -n example,raven  \"yarn workspace example dev\" \"yarn workspace raven watch\""
+  },
   "workspaces": [
     "workspaces/*"
-  ]
+  ],
+  "dependencies": {
+    "concurrently": "^7.3.0"
+  }
 }
