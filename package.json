@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "concurrently -i -k -r -n example,raven  \"yarn workspace example dev\" \"yarn workspace raven watch\""
+    "dev": "concurrently -i -k -r -n example,raven,raven-auth  \"yarn workspace example dev\" \"yarn workspace raven watch\" \"yarn workspace raven-plugin-auth watch\""
   },
   "workspaces": [
     "workspaces/*"

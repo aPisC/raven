@@ -9,7 +9,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "raven": "*"
+    "@types/joi": "^17.2.3",
+    "joi": "^17.6.0",
+    "raven": "*",
+    "sequelize": "^6.21.4",
+    "sequelize-typescript": "^2.1.3"
   },
   "devDependencies": {
     "typescript": "^4.7.4"
