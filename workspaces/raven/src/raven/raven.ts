@@ -137,7 +137,7 @@ export class Raven {
   }
 
   useModel(model: typeof Model) {
-    this.dependencyContainer.register(Raven.ModelsSymbol, { useValue: model });
+    this.dependencyContainer.registerInstance(Raven.ModelsSymbol, model);
   }
 
   getRepository<M extends Model>(model: ModelCtor<M>): Repository<M> {
