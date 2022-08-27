@@ -4,9 +4,9 @@ import { ValidatorFn } from './createAnnotation'
 export function bodyValidator(schema: Joi.Schema | (() => Joi.Schema)): ValidatorFn {
   return (ctx) => {
     const _schema = typeof schema === 'function' ? schema() : schema
-    const body = ctx.body
+    const body = ctx.request.body
 
-    const { error, value } = _schema.validate(body)
+    const { error } = _schema.validate(body)
     if (error) throw error
   }
 }

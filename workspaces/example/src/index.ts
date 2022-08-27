@@ -1,23 +1,10 @@
-import { Context, Next } from 'koa'
-import { Middleware, Plugin, Raven } from 'raven'
-import { autoInjectable } from 'tsyringe'
-
-@autoInjectable()
-class TestPlugin extends Plugin {
-  initialize(raven: Raven): void {
-    raven.useMiddleware(
-      class extends Middleware {
-        protected execute(ctx: Context, next: Next) {
-          console.log('Endpoint: ', ctx.endpoint, this)
-          return next()
-        }
-      }
-    )
-  }
-}
+import { Raven } from 'raven'
 
 const server = new Raven()
-server.config.port = 3000
+server.config.port = 3001
+server.config['plugins.raven-plugin-auth'] = {
+  secret: 'asd',
+}
 server.loadFiles({
   root: __dirname,
   controllers: ['controllers/*.ts'],

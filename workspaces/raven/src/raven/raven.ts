@@ -2,13 +2,15 @@ import 'reflect-metadata'
 
 import { createServer } from 'http'
 import Koa from 'koa'
+import KoaBodyparser from 'koa-bodyparser'
 import Router from 'koa-router'
 import { Model, ModelCtor, Repository, Sequelize, SequelizeOptions } from 'sequelize-typescript'
-import { container as globalDependencyContainer, FactoryProvider, ValueProvider } from 'tsyringe'
+import { container as globalDependencyContainer, FactoryProvider } from 'tsyringe'
 import { constructor } from 'tsyringe/dist/typings/types'
 import { ExecuteEndpointMiddleware } from '../middleware/executeEndpointMiddleware'
 import { KoaMiddleware } from '../middleware/koaMiddleware'
 import { Middleware } from '../middleware/middleware'
+import { MiddlewarePriority } from '../middleware/middlewarePriority'
 import { Plugin } from '../plugin/plugin'
 import { Route } from '../route/route'
 import { ValidateMiddleware } from '../validate/middleware'
@@ -23,7 +25,7 @@ export class Raven {
 
   public config: any = {}
 
-  private readonly middlewares: symbol[] = []
+  private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
 
   public readonly dependencyContainer = globalDependencyContainer.createChildContainer()
 
@@ -70,10 +72,11 @@ export class Raven {
     this.dependencyContainer.registerInstance(Raven.ModelsSymbol, model)
   }
 
-  useService(service: constructor<any>): void
-  useService(service: constructor<any>) {
-    console.log('register service', service)
-    this.dependencyContainer.register(service, service)
+  useService<T extends Object>(ctor: constructor<T>, service?: T | (() => T)) {
+    if (!service) this.dependencyContainer.register(ctor, ctor)
+    else if (typeof service === 'function') this.dependencyContainer.register(ctor, { useFactory: service as () => T })
+    else if (typeof service === 'object') this.dependencyContainer.registerInstance(ctor, service)
+    else throw new Error('Unable to register service')
   }
 
   usePlugin(plugin: Plugin | constructor<Plugin> | string) {
@@ -108,27 +111,32 @@ export class Raven {
     pluginInstance.initialize(this)
   }
 
-  useKoaMiddleware(middleware: KoaMiddleware) {
+  useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {
     const middlewareSymbol = Symbol()
 
     this.dependencyContainer.register(middlewareSymbol, {
       useValue: middleware,
     })
-    this.middlewares.push(middlewareSymbol)
+    this.middlewares.push({ symbol: middlewareSymbol, priority: priority })
   }
 
-  useMiddleware(middleware: constructor<Middleware>): void
-  useMiddleware(middleware: ValueProvider<Middleware>): void
-  useMiddleware(middleware: FactoryProvider<Middleware>): void
-  useMiddleware(middleware: any) {
+  useMiddleware(priority: MiddlewarePriority, middleware: constructor<Middleware>): void
+  useMiddleware(priority: MiddlewarePriority, middleware: Middleware): void
+  useMiddleware(priority: MiddlewarePriority, middleware: FactoryProvider<Middleware>): void
+  useMiddleware(priority: MiddlewarePriority, middleware: any) {
     const middlewareSymbol = Symbol()
 
-    this.dependencyContainer.register(middlewareSymbol, middleware)
-    this.middlewares.push(middlewareSymbol)
+    if (middleware instanceof Middleware) this.dependencyContainer.registerInstance(middlewareSymbol, middleware)
+    else this.dependencyContainer.register(middlewareSymbol, middleware)
+    this.middlewares.push({ symbol: middlewareSymbol, priority: priority })
   }
 
   getRepository<M extends Model>(model: ModelCtor<M>): Repository<M> {
-    return this.sequelize.getRepository(model)
+    try {
+      return this.sequelize.getRepository(model)
+    } catch (err: any) {
+      throw new Error(`Unable to create repository for ${model.name}. ${err}`)
+    }
   }
 
   loadFiles(config: RavenLoaderConfig) {
@@ -169,13 +177,29 @@ export class Raven {
     this._koa = koa
 
     // Register middlewares
-    koa.use(router.routes())
-    this.middlewares.forEach((middlewareSymbol) => {
-      const middleware = this.dependencyContainer.resolve<Middleware | KoaMiddleware>(middlewareSymbol)
+    const resolvedMiddlewares = this.middlewares.map(({ priority, symbol }) => {
+      const middleware = this.dependencyContainer.resolve<Middleware | KoaMiddleware>(symbol)
       const handler = typeof middleware === 'function' ? middleware : middleware.handler
-      koa.use(handler)
+      return { priority, handler }
     })
-    // Register system middlewares
+
+    resolvedMiddlewares
+      .filter(({ priority }) => priority === MiddlewarePriority.PreIngress)
+      .forEach(({ handler }) => koa.use(handler))
+    resolvedMiddlewares
+      .filter(({ priority }) => priority === MiddlewarePriority.PostIngress)
+      .forEach(({ handler }) => koa.use(handler))
+    resolvedMiddlewares
+      .filter(({ priority }) => priority === MiddlewarePriority.PreRouting)
+      .forEach(({ handler }) => koa.use(handler))
+    koa.use(router.routes())
+    resolvedMiddlewares
+      .filter(({ priority }) => priority === MiddlewarePriority.PostRouting)
+      .forEach(({ handler }) => koa.use(handler))
+    koa.use(KoaBodyparser({}))
+    resolvedMiddlewares
+      .filter(({ priority }) => priority === MiddlewarePriority.PreExecute)
+      .forEach(({ handler }) => koa.use(handler))
     koa.use(ValidateMiddleware)
     koa.use(ExecuteEndpointMiddleware)
 

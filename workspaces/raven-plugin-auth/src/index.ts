@@ -1,18 +1,23 @@
-import { Plugin, Raven } from 'raven'
-import AuthController from './AuthController'
-import AuthService from './AuthService'
+import KoaJwt from 'koa-jwt'
+import _ from 'lodash'
+import { MiddlewarePriority, Plugin, Raven } from 'raven'
+import { AuthMiddleware } from './authMiddleware'
+import AuthService from './authService'
+
+export { Authorize } from './authorize'
 
 export default class RavenPluginAuth extends Plugin {
   initialize(raven: Raven): void {
-    console.log('Registering plugin: ', this.constructor.name)
+    const config = _.get(raven.config, 'plugins.raven-plugin-auth')
 
-    // Models
-    //raven.useModel(UserModel)
+    const secret: string = _.get(config, 'secret')
+    const blockWithoutToken: boolean = _.get(config, 'blockWithoutToken')
+    const defaultAuthorized: boolean = _.get(config, 'defaultAuthorized')
 
-    // Services
-    raven.useService(AuthService)
+    if (!secret) throw new Error('Jwt secret must be configured')
 
-    // Controllers
-    raven.useController(AuthController)
+    raven.useKoaMiddleware(MiddlewarePriority.PostIngress, KoaJwt({ secret, passthrough: !blockWithoutToken }))
+    raven.useMiddleware(MiddlewarePriority.PostRouting, new AuthMiddleware(!!defaultAuthorized))
+    raven.useService(AuthService, new AuthService(secret))
   }
 }

@@ -6,9 +6,10 @@ export async function ValidateMiddleware(ctx: Context, next: Next) {
 
   for (const validator of validators) {
     try {
-      await validators(ctx)
+      await validator(ctx)
     } catch (err) {
       throw ctx.throw(400, err as Error)
     }
   }
+  return await next()
 }
