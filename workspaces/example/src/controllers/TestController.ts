@@ -1,4 +1,4 @@
-import { Route } from 'raven'
+import { Context, Raven, Route } from 'raven'
 import { Authorize, AuthService } from 'raven-plugin-auth'
 import { Repository, Sequelize } from 'sequelize-typescript'
 import { injectable } from 'tsyringe'
@@ -10,13 +10,14 @@ import TestModel from '../models/TestModel'
 export default class TestController {
   private model: Repository<TestModel>
 
-  constructor(sequelize: Sequelize, private authService: AuthService) {
+  constructor(sequelize: Sequelize, private authService: AuthService, private raven: Raven) {
     this.model = sequelize.getRepository(TestModel)
   }
 
   @Route.Get('/')
   @Authorize()
   async index() {
+    const service = this.raven.dependencyContainer.resolve(AuthService)
     console.log('first')
     return 'HelloWorld'
   }
@@ -30,7 +31,7 @@ export default class TestController {
 
   @Route.Get('/login')
   @Authorize(false)
-  async login() {
+  async login(ctx: Context) {
     return this.authService.createJwt({ userId: 10, name: 'test' })
   }
 }
