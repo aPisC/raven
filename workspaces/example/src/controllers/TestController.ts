@@ -1,5 +1,5 @@
 import { Route } from 'raven'
-import { Authorize } from 'raven-plugin-auth'
+import { Authorize, AuthService } from 'raven-plugin-auth'
 import { Repository, Sequelize } from 'sequelize-typescript'
 import { injectable } from 'tsyringe'
 import TestModel from '../models/TestModel'
@@ -10,7 +10,7 @@ import TestModel from '../models/TestModel'
 export default class TestController {
   private model: Repository<TestModel>
 
-  constructor(sequelize: Sequelize) {
+  constructor(sequelize: Sequelize, private authService: AuthService) {
     this.model = sequelize.getRepository(TestModel)
   }
 
@@ -26,5 +26,11 @@ export default class TestController {
     const entry = await this.model.findOne()
     console.log(entry)
     return entry
+  }
+
+  @Route.Get('/login')
+  @Authorize(false)
+  async login() {
+    return this.authService.createJwt({ userId: 10, name: 'test' })
   }
 }

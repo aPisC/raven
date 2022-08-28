@@ -2,9 +2,10 @@ import KoaJwt from 'koa-jwt'
 import _ from 'lodash'
 import { MiddlewarePriority, Plugin, Raven } from 'raven'
 import { AuthMiddleware } from './authMiddleware'
+import { Authorize } from './authorize'
 import AuthService from './authService'
 
-export { Authorize } from './authorize'
+const SETTINGS_ROOT = 'plugins.raven-plugin-auth'
 
 export default class RavenPluginAuth extends Plugin {
   initialize(raven: Raven): void {
@@ -21,3 +22,5 @@ export default class RavenPluginAuth extends Plugin {
     raven.useService(AuthService, new AuthService(secret))
   }
 }
+
+export { AuthService, Authorize, RavenPluginAuth }
