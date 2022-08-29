@@ -1,10 +1,17 @@
 import { flatten } from 'flattenizer'
+import { ConfigProvider } from './config-provider'
+import { ConfigSectionProvider } from './config-section-provider'
 
 interface ConfigStore {
   [key: string]: any
 }
 
-export class Config {
+export class ConfigObjectProvider extends ConfigProvider {
+  constructor(initialData?: Object) {
+    super()
+    if (initialData) this.set(initialData)
+  }
+
   private readonly _values: ConfigStore = {}
   public get values(): Readonly<ConfigStore> {
     return this._values
@@ -33,16 +40,21 @@ export class Config {
         const flatValues: any = flatten(value)
         Object.keys(flatValues).forEach((key) => this.set(`${keyOrData}.${key}`, flatValues[key]))
       } else {
-        const keyConflict = Object.keys(this._values).find((key) => keyOrData.startsWith(`${key}.`))
+        const keyConflict =
+          Object.keys(this._values).find((key) => key.startsWith(`${keyOrData}.`)) ||
+          Object.keys(this._values).find((key) => keyOrData.startsWith(`${key}.`))
         if (keyConflict) throw new Error(`Can not set ${keyOrData}, ${keyConflict} is already defined`)
         this._values[keyOrData] = value
       }
     }
-    // Update all keys in object
+    // Update all keys from object
     else {
       const flatValues: any = flatten(keyOrData)
       Object.keys(flatValues).forEach((key) => this.set(key, flatValues[key]))
     }
-    console.log(keyOrData, value, this.values)
+  }
+
+  getSection(key: string): ConfigProvider {
+    return new ConfigSectionProvider(key, this)
   }
 }
