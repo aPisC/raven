@@ -16,6 +16,7 @@ import { MiddlewarePriority } from '../middleware/middleware-priority'
 import { Plugin } from '../plugin/plugin'
 import { Route } from '../route'
 import { ValidateMiddleware } from '../validate/validate-middleware'
+import { RavenHooks } from './hooks'
 import { RavenLoader, RavenLoaderConfig } from './loader'
 
 export class Raven {
@@ -26,6 +27,7 @@ export class Raven {
   public static readonly ModelsSymbol: unique symbol = Symbol()
 
   public readonly config: ConfigProvider = new ConfigObjectProvider()
+  public readonly hooks: RavenHooks = new RavenHooks(this)
 
   private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
 
@@ -103,14 +105,18 @@ export class Raven {
       throw new Error('Unable to resolve plugin')
     }
 
-    if (this.dependencyContainer.isRegistered(pluginConstruct, true)) throw new Error('Plugin is already registered')
+    if (this.dependencyContainer.isRegistered(pluginConstruct, true))
+      throw new Error(`Plugin ${pluginName} is already registered`)
 
     if (!pluginInstance) pluginInstance = this.dependencyContainer.resolve(pluginConstruct)
 
     if (!(pluginInstance instanceof Plugin)) throw new Error(`Unable to instantiate plugin`)
 
     this.dependencyContainer.registerInstance(pluginConstruct, pluginInstance)
-    pluginInstance.initialize(this)
+    this.hooks.initialize.add(() => {
+      console.log(`Initialize plugin ${pluginName}`)
+      ;(pluginInstance as Plugin).initialize(this)
+    })
   }
 
   useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {
@@ -147,6 +153,10 @@ export class Raven {
   }
 
   async start() {
+    // Run init and startup hooks
+    this.hooks.initialize.execute()
+    this.hooks.start.execute()
+
     // Initialize Sequelize
     const models = this.dependencyContainer.isRegistered(Raven.ModelsSymbol)
       ? this.dependencyContainer.resolveAll<ModelCtor>(Raven.ModelsSymbol)
