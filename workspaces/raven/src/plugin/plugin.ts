@@ -1,5 +1,5 @@
-import { Raven } from "../raven/raven";
+import { Raven } from '../raven/raven'
 
 export abstract class Plugin {
-  public abstract initialize(raven: Raven): void;
+  public abstract initialize(raven: Raven, ...args: any[]): void
 }

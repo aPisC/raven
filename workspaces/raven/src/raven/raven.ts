@@ -83,20 +83,19 @@ export class Raven {
     else throw new Error('Unable to register service')
   }
 
-  usePlugin(plugin: Plugin | constructor<Plugin> | string) {
+  usePlugin<TPlugin extends Plugin = Plugin>(plugin: TPlugin | constructor<TPlugin> | string): TPlugin {
     let pluginName: string
-    let pluginConstruct: constructor<Plugin>
-    let pluginInstance: Plugin | null = null
+    let pluginConstruct: constructor<TPlugin>
+    let pluginInstance: TPlugin | null = null
 
     if (typeof plugin === 'string') {
       pluginName = plugin
       const pluginModule = require(plugin)
       plugin = typeof pluginModule === 'function' ? pluginModule : pluginModule.default
     }
-
     if (typeof plugin === 'object') {
       pluginInstance = plugin
-      pluginConstruct = plugin.constructor as constructor<Plugin>
+      pluginConstruct = plugin.constructor as constructor<TPlugin>
       pluginName ??= pluginConstruct.name
     } else if (typeof plugin === 'function') {
       pluginConstruct = plugin
@@ -114,9 +113,12 @@ export class Raven {
 
     this.dependencyContainer.registerInstance(pluginConstruct, pluginInstance)
     this.hooks.initialize.add(() => {
+      if (!pluginInstance) return
       console.log(`Initialize plugin ${pluginName}`)
-      ;(pluginInstance as Plugin).initialize(this)
+      pluginInstance.initialize(this)
     })
+
+    return pluginInstance
   }
 
   useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {

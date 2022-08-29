@@ -1,8 +1,12 @@
 import { Raven } from 'raven'
+import RavenPluginAuth from 'raven-plugin-auth'
 
 const server = new Raven()
-console.log(process.env['NODE_ENV'])
-server.usePlugin('raven-plugin-auth')
+
+server.usePlugin<RavenPluginAuth>('raven-plugin-auth').configure({
+  blockWithoutToken: false,
+  defaultAuthorized: false,
+})
 
 server.loadFiles({
   root: __dirname,
