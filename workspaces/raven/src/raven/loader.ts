@@ -58,7 +58,7 @@ export class RavenLoader {
         try {
           const config = module || {}
           if (typeof config !== 'object') throw new Error('No suitable config exported')
-          raven.config.set(module)
+          raven.config.set(config)
         } catch (err: any) {
           console.warn('Unable to load config', file, err)
         }

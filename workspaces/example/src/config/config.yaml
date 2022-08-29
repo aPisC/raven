@@ -1,3 +1,2 @@
-server:
-  port: 3001
+server.port: 3001
 plugins.raven-plugin-auth.secret: mySecret
