@@ -1,11 +1,11 @@
-import { addRoute } from './addRoute'
-import { annotateEndpoint } from './annotateEndpoint'
-import { createRouter } from './createRouter'
-import { decorateRoute } from './decorateRoute'
-import { getConfig } from './getConfig'
-import { getRoutes } from './getRoutes'
+import { addRoute } from './add-route'
+import { annotateEndpoint } from './annotate-endpoint'
+import { createRouter } from './create-router'
+import { decorateRoute } from './decorate-route'
+import { getConfig } from './get-config'
+import { getRoutes } from './get-routes'
 import { HttpMethod } from './types'
-import { updateConfig } from './updateConfig'
+import { updateConfig } from './update-config'
 
 export const Route = {
   // Method decorators

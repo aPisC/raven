@@ -1,6 +1,6 @@
 import { Context } from 'koa'
 import { Raven } from '../raven/raven'
-import { Route } from '../route/route'
+import { Route } from '../route'
 
 export type ValidatorFn = (ctx: Context, raven: Raven) => void | Promise<void>
 

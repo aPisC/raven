@@ -1,6 +1,6 @@
 import { constructor } from 'tsyringe/dist/typings/types'
 import { Plugin } from '../plugin/plugin'
-import { createAnnotation } from './createAnnotation'
+import { createAnnotation } from './create-annotation'
 
 export function pluginInitializedValidator(plugin: constructor<Plugin>) {
   const cache = { success: false }

@@ -1,5 +1,5 @@
-import { addRoute } from "./addRoute";
-import { HttpMethod } from "./types";
+import { addRoute } from './add-route'
+import { HttpMethod } from './types'
 
 export function decorateRoute(method: HttpMethod, path?: string) {
   return function (
@@ -7,7 +7,7 @@ export function decorateRoute(method: HttpMethod, path?: string) {
     propertyKey: string | symbol,
     descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
   ): void {
-    if (!path) path = `/${String(propertyKey)}`;
-    addRoute(target, method, path, propertyKey);
-  };
+    if (!path) path = `/${String(propertyKey)}`
+    addRoute(target, method, path, propertyKey)
+  }
 }

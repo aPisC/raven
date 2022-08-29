@@ -1,7 +1,7 @@
 import Joi from 'joi'
-import { bodyValidator } from './bodyValidator'
-import { createAnnotation, ValidationSymbol } from './createAnnotation'
-import { pluginInitializedValidator } from './pluginInitializedValidator'
+import { bodyValidator } from './body-validator'
+import { createAnnotation, ValidationSymbol } from './create-annotation'
+import { pluginInitializedValidator } from './plugin-initialized-validator'
 
 export const Validate = {
   Symbol: ValidationSymbol,

@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { ValidatorFn } from './createAnnotation'
+import { ValidatorFn } from './create-annotation'
 
 export function bodyValidator(schema: Joi.Schema | (() => Joi.Schema)): ValidatorFn {
   return (ctx) => {

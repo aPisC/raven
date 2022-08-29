@@ -1,6 +1,6 @@
 import { Context, Next } from 'koa'
 import { Raven } from '../raven/raven'
-import { ValidationSymbol, ValidatorFn } from './createAnnotation'
+import { ValidationSymbol, ValidatorFn } from './create-annotation'
 
 export function ValidateMiddleware(raven: Raven) {
   return async (ctx: Context, next: Next) => {
