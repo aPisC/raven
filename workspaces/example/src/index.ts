@@ -1,17 +1,14 @@
-import { MiddlewarePriority, Raven } from 'raven'
+import { Raven } from 'raven'
 
 const server = new Raven()
-server.config.port = 3001
-server.config['plugins.raven-plugin-auth'] = {
-  secret: 'asd',
-}
+
+server.usePlugin('raven-plugin-auth')
 
 server.loadFiles({
   root: __dirname,
   controllers: ['controllers/*.ts'],
   models: ['models/*.ts'],
+  config: ['config.yaml'],
 })
-server.useKoaMiddleware(MiddlewarePriority.PostIngress, () => {})
 
-server.usePlugin('raven-plugin-auth')
 server.start()

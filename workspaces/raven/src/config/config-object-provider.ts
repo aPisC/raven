@@ -57,4 +57,10 @@ export class ConfigObjectProvider extends ConfigProvider {
   getSection(key: string): ConfigProvider {
     return new ConfigSectionProvider(key, this)
   }
+
+  getRequired(key: string) {
+    const value = this.get(key)
+    if (value == null) throw new Error(`${key} is not configured`)
+    return value
+  }
 }

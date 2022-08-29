@@ -1,5 +1,4 @@
 import KoaJwt from 'koa-jwt'
-import _ from 'lodash'
 import { MiddlewarePriority, Plugin, Raven } from 'raven'
 import { AuthMiddleware } from './authMiddleware'
 import { Authorize } from './authorize'
@@ -9,11 +8,11 @@ const SETTINGS_ROOT = 'plugins.raven-plugin-auth'
 
 export default class RavenPluginAuth extends Plugin {
   initialize(raven: Raven): void {
-    const config = _.get(raven.config, 'plugins.raven-plugin-auth')
+    const config = raven.config.getSection('plugins.raven-plugin-auth')
 
-    const secret: string = _.get(config, 'secret')
-    const blockWithoutToken: boolean = _.get(config, 'blockWithoutToken')
-    const defaultAuthorized: boolean = _.get(config, 'defaultAuthorized')
+    const secret: string = config.getRequired('secret')
+    const blockWithoutToken: boolean = config.get('blockWithoutToken', false)
+    const defaultAuthorized: boolean = config.get('defaultAuthorized', false)
 
     if (!secret) throw new Error('Jwt secret must be configured')
 

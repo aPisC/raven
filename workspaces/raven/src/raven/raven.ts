@@ -7,6 +7,8 @@ import Router from 'koa-router'
 import { Model, ModelCtor, Repository, Sequelize, SequelizeOptions } from 'sequelize-typescript'
 import { container as globalDependencyContainer, FactoryProvider } from 'tsyringe'
 import { constructor } from 'tsyringe/dist/typings/types'
+import { ConfigObjectProvider } from '../config/config-object-provider'
+import { ConfigProvider } from '../config/config-provider'
 import { ExecuteEndpointMiddleware } from '../middleware/execute-endpoint-middleware'
 import { KoaMiddleware } from '../middleware/koa-middleware'
 import { Middleware } from '../middleware/middleware'
@@ -23,7 +25,7 @@ export class Raven {
   public static readonly ControllersSymbol: unique symbol = Symbol()
   public static readonly ModelsSymbol: unique symbol = Symbol()
 
-  public config: any = {}
+  public readonly config: ConfigProvider = new ConfigObjectProvider()
 
   private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
 
@@ -204,8 +206,9 @@ export class Raven {
     koa.use(ExecuteEndpointMiddleware)
 
     // Starting http server
+    const serverCoinfig = this.config.getSection('server')
     const httpServer = createServer(koa.callback())
-    httpServer.listen(this.config.port)
+    httpServer.listen(serverCoinfig.getRequired('port'))
     console.log('Server started', httpServer.address())
   }
 }

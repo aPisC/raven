@@ -6,4 +6,6 @@ export abstract class ConfigProvider {
   abstract set(data: Object): void
 
   abstract getSection(key: string): ConfigProvider
+
+  abstract getRequired(key: string): any
 }

@@ -31,4 +31,8 @@ export class ConfigSectionProvider extends ConfigProvider {
   getSection(key: string): ConfigProvider {
     return new ConfigSectionProvider(key, this)
   }
+
+  getRequired(key: string) {
+    return this.base.getRequired(`${this.key}.${key}`)
+  }
 }
