@@ -18,8 +18,10 @@ class HookCollection {
     this.hooks.push(hook)
   }
 
-  execute() {
-    this.hooks.forEach((hook) => hook(this.raven))
+  async execute(): Promise<void> {
+    for (const hook of this.hooks) {
+      await hook(this.raven)
+    }
   }
 
   clear() {
@@ -28,8 +30,8 @@ class HookCollection {
 }
 
 class SingleRunHookCollection extends HookCollection {
-  override execute(): void {
-    super.execute()
+  override async execute(): Promise<void> {
+    await super.execute()
     super.clear()
   }
 }

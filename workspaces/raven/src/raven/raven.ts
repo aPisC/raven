@@ -14,6 +14,7 @@ import { KoaMiddleware } from '../middleware/koa-middleware'
 import { Middleware } from '../middleware/middleware'
 import { MiddlewarePriority } from '../middleware/middleware-priority'
 import { Plugin } from '../plugin/plugin'
+import { PluginManager } from '../plugin/plugin-manager'
 import { Route } from '../route'
 import { ValidateMiddleware } from '../validate/validate-middleware'
 import { RavenHooks } from './hooks'
@@ -29,11 +30,14 @@ export class Raven {
   public readonly config: ConfigProvider = new ConfigObjectProvider()
   public readonly hooks: RavenHooks = new RavenHooks(this)
 
+  private readonly pluginManager: PluginManager
   private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
 
   public readonly dependencyContainer = globalDependencyContainer.createChildContainer()
 
   constructor() {
+    this.pluginManager = new PluginManager(this)
+
     // Register dependency constructors
     this.dependencyContainer.registerInstance(Raven.KoaCtorSymbol, Koa)
     this.dependencyContainer.registerInstance(Raven.SequelizeCtorSymbol, Sequelize)
@@ -84,41 +88,7 @@ export class Raven {
   }
 
   usePlugin<TPlugin extends Plugin = Plugin>(plugin: TPlugin | constructor<TPlugin> | string): TPlugin {
-    let pluginName: string
-    let pluginConstruct: constructor<TPlugin>
-    let pluginInstance: TPlugin | null = null
-
-    if (typeof plugin === 'string') {
-      pluginName = plugin
-      const pluginModule = require(plugin)
-      plugin = typeof pluginModule === 'function' ? pluginModule : pluginModule.default
-    }
-    if (typeof plugin === 'object') {
-      pluginInstance = plugin
-      pluginConstruct = plugin.constructor as constructor<TPlugin>
-      pluginName ??= pluginConstruct.name
-    } else if (typeof plugin === 'function') {
-      pluginConstruct = plugin
-      pluginName ??= pluginConstruct.name
-    } else {
-      throw new Error('Unable to resolve plugin')
-    }
-
-    if (this.dependencyContainer.isRegistered(pluginConstruct, true))
-      throw new Error(`Plugin ${pluginName} is already registered`)
-
-    if (!pluginInstance) pluginInstance = this.dependencyContainer.resolve(pluginConstruct)
-
-    if (!(pluginInstance instanceof Plugin)) throw new Error(`Unable to instantiate plugin`)
-
-    this.dependencyContainer.registerInstance(pluginConstruct, pluginInstance)
-    this.hooks.initialize.add(() => {
-      if (!pluginInstance) return
-      console.log(`Initialize plugin ${pluginName}`)
-      pluginInstance.initialize(this)
-    })
-
-    return pluginInstance
+    return this.pluginManager.usePlugin(plugin)
   }
 
   useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {
