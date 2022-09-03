@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc -b",
+    "watch": "tsc -b -w",
     "dev": "nodemon ./src/index.ts",
     "start": "node dist/index.js"
   },

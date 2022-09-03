@@ -1,5 +1,6 @@
 import { Context, Raven, Route } from 'raven'
 import { Authorize, AuthService } from 'raven-plugin-auth'
+import 'reflect-metadata'
 import { Repository, Sequelize } from 'sequelize-typescript'
 import { injectable } from 'tsyringe'
 import TestModel from '../models/TestModel'
