@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "echo done",
-    "build": "tsc",
+    "build": "tsc -b",
     "watch": "tsc -w",
     "test": "jest"
   },

@@ -72,9 +72,8 @@ export class RavenLoader {
 
     files.forEach((file) => {
       try {
-        console.log('Loading', file)
         const module = loadFile(file)
-        modules.push({ module, file })
+        if (module !== false) modules.push({ module, file })
       } catch (err: any) {
         console.warn('Unable to load modul', file, err)
       }
@@ -89,7 +88,9 @@ function loadFile(file: string): any {
     .sort((a, b) => b.length - a.length)
     .find((ext) => file.endsWith(ext))
   const loader = loaders[loaderName || '']
+  if (loader === null) return false
   if (!loader) throw new Error(`Unable to find loader for ${file}`)
 
+  console.log('Loading', file)
   return loader(file)
 }

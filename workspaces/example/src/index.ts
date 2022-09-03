@@ -10,9 +10,9 @@ server.usePlugin<RavenPluginAuth>('raven-plugin-auth').configure({
 
 server.loadFiles({
   root: __dirname,
-  controllers: ['controllers/*.ts'],
-  models: ['models/*.ts'],
-  config: ['config/config.yaml', `config/config.${process.env['NODE_ENV'] || 'development'}.yaml`],
+  controllers: ['controllers/*.{js,ts}'],
+  models: ['models/*.{js,ts}'],
+  config: ['../config/config.yaml', `../config/config.${process.env['NODE_ENV'] || 'development'}.yaml`],
 })
 
 server.start()
