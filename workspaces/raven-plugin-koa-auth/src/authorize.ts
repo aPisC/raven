@@ -1,4 +1,4 @@
-import { Route, Validate } from 'raven'
+import { Route, Validate } from 'raven-plugin-koa'
 import RavenPluginAuth from '.'
 
 export const AuthorizeSymbol = Symbol('Authorize')

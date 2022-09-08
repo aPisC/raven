@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "raven-plugin-koa",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "joi": "^17.6.0",
+    "koa": "^2.13.4",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^10.1.1",
+    "raven": "*",
+    "tsyringe": "*"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "@types/joi": "^17.2.3",
+    "@types/koa": "^2.13.4",
+    "@types/koa-bodyparser": "^4.3.7",
+    "@types/koa-router": "^7.4.4"
+  }
+}

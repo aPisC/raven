@@ -1,6 +1,7 @@
+import { ConfigProvider } from '../config/config-provider'
 import { Raven } from '../raven/raven'
 
-type ConfigHook<TConfig> = (opt: Partial<TConfig>, raven: Raven) => void
+type ConfigHook<TConfig> = (opt: Partial<TConfig>, config: ConfigProvider, raven: Raven) => void
 
 export abstract class Plugin<TConfig extends Object = any> {
   private readonly configHooks: ConfigHook<TConfig>[] = []
@@ -21,7 +22,7 @@ export abstract class Plugin<TConfig extends Object = any> {
    * other plugin's resource registrations
    */
   onInitialize(raven: Raven): void {
-    this.configHooks.forEach((hook) => hook(this.config, raven))
+    this.configHooks.forEach((hook) => hook(this.config, raven.config, raven))
   }
 
   /**

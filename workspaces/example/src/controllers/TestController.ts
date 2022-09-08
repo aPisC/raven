@@ -1,5 +1,6 @@
-import { Context, Raven, Route } from 'raven'
-import { Authorize, AuthService } from 'raven-plugin-auth'
+import { Context, Raven } from 'raven'
+import { Route } from 'raven-plugin-koa'
+import { Authorize, AuthService } from 'raven-plugin-koa-auth'
 import 'reflect-metadata'
 import { Repository, Sequelize } from 'sequelize-typescript'
 import { injectable } from 'tsyringe'

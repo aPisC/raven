@@ -1,5 +1,6 @@
 import KoaJwt from 'koa-jwt'
-import { KoaPlugin, MiddlewarePriority, Plugin, Raven } from 'raven'
+import { Plugin, Raven } from 'raven'
+import { MiddlewarePriority, RavenPluginKoa } from 'raven-plugin-koa'
 import { AuthMiddleware } from './authMiddleware'
 import { Authorize } from './authorize'
 import AuthService from './authService'
@@ -12,7 +13,7 @@ interface RavenAuthPluginConfiguration {
   defaultAuthorized: boolean
 }
 
-export default class RavenPluginAuth extends Plugin<RavenAuthPluginConfiguration> {
+export default class RavenPluginKoaAuth extends Plugin<RavenAuthPluginConfiguration> {
   override onInitialize(raven: Raven): void {
     super.onInitialize(raven)
     const secret: string = this.config.secret || ''
@@ -20,7 +21,7 @@ export default class RavenPluginAuth extends Plugin<RavenAuthPluginConfiguration
     if (!secret) throw new Error('Jwt secret must be configured')
 
     raven.dependencyContainer
-      .resolve(KoaPlugin)
+      .resolve(RavenPluginKoa)
       .useKoaMiddleware(MiddlewarePriority.PostIngress, KoaJwt({ secret, passthrough: !this.config.blockWithoutToken }))
       .useMiddleware(MiddlewarePriority.PostRouting, new AuthMiddleware(!!this.config.defaultAuthorized))
 
@@ -28,4 +29,4 @@ export default class RavenPluginAuth extends Plugin<RavenAuthPluginConfiguration
   }
 }
 
-export { AuthService, Authorize, RavenPluginAuth }
+export { AuthService, Authorize, RavenPluginKoaAuth }

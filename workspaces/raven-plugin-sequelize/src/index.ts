@@ -1,12 +1,12 @@
+import { Plugin, Raven } from 'raven'
 import { Model, ModelCtor, Sequelize } from 'sequelize-typescript'
 import { DependencyContainer, injectable } from 'tsyringe'
-import { Plugin } from '../plugin/plugin'
-import { Raven } from '../raven/raven'
+import { Config, defaultConfig } from './config'
+
+const ModelsSymbol = Symbol('Sequelize Models')
 
 @injectable()
-export class SequelizePlugin extends Plugin {
-  private static readonly ModelsSymbol = Symbol('Sequelize Models')
-
+export class RavenPluginSequelize extends Plugin<Config> {
   private readonly raven: Raven
 
   private Sequelize: typeof Sequelize = Sequelize
@@ -14,10 +14,11 @@ export class SequelizePlugin extends Plugin {
   constructor(raven: Raven) {
     super()
     this.raven = raven
+    Object.assign(this.config, defaultConfig)
   }
 
   useModel(model: typeof Model) {
-    this.raven.dependencyContainer.registerInstance(SequelizePlugin.ModelsSymbol, model)
+    this.raven.dependencyContainer.registerInstance(ModelsSymbol, model)
   }
 
   extend(extender: (sequelizeClass: typeof Sequelize) => typeof Sequelize) {
@@ -53,13 +54,12 @@ export class SequelizePlugin extends Plugin {
   }
 
   private initializeSequelizeInstance(dependencyContainer: DependencyContainer) {
-    const models = dependencyContainer.isRegistered(SequelizePlugin.ModelsSymbol)
-      ? dependencyContainer.resolveAll<ModelCtor>(SequelizePlugin.ModelsSymbol)
+    const models = dependencyContainer.isRegistered(ModelsSymbol)
+      ? dependencyContainer.resolveAll<ModelCtor>(ModelsSymbol)
       : []
 
     const sequelize = new this.Sequelize({
-      dialect: 'sqlite',
-      storage: ':memory:',
+      ...this.config,
       repositoryMode: true,
       models: models,
     })

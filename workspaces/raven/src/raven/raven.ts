@@ -58,10 +58,6 @@ export class Raven {
     this.loader.load(config)
   }
 
-  /*useSequelize(): SequelizePlugin {
-    return this.pluginManager.usePlugin(new SequelizePlugin(this))
-  }*/
-
   async start() {
     // Run init and startup hooks
     await this.hooks.initialize.execute()

@@ -4,14 +4,14 @@ import KoaBodyparser from 'koa-bodyparser'
 import Router from 'koa-router'
 import { FactoryProvider, injectable } from 'tsyringe'
 import { constructor, DependencyContainer } from 'tsyringe/dist/typings/types'
-import { ExecuteEndpointMiddleware } from '../middleware/execute-endpoint-middleware'
-import { KoaMiddleware } from '../middleware/koa-middleware'
-import { Middleware } from '../middleware/middleware'
-import { MiddlewarePriority } from '../middleware/middleware-priority'
-import { Plugin } from '../plugin/plugin'
-import { Raven } from '../raven/raven'
-import { Route } from '../route'
-import { ValidateMiddleware } from '../validate/validate-middleware'
+import { ExecuteEndpointMiddleware } from './middleware/execute-endpoint-middleware'
+import { KoaMiddleware } from './middleware/koa-middleware'
+import { Middleware } from './middleware/middleware'
+import { MiddlewarePriority } from './middleware/middleware-priority'
+
+import { Plugin, Raven } from 'raven'
+import { Route } from './route'
+import { ValidateMiddleware } from './validate/validate-middleware'
 
 interface KoaPluginConfig {
   port: number
@@ -20,7 +20,7 @@ interface KoaPluginConfig {
 const ControllersSymbol = Symbol('Controllers')
 
 @injectable()
-export class KoaPlugin extends Plugin<KoaPluginConfig> {
+export class RavenPluginKoa extends Plugin<KoaPluginConfig> {
   private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
   private readonly raven: Raven
 

@@ -1,4 +1,5 @@
-import { Context, Middleware, Next } from 'raven'
+import { Context, Next } from 'raven'
+import { Middleware } from 'raven-plugin-koa'
 import { AuthorizeSymbol } from './authorize'
 
 export class AuthMiddleware extends Middleware {

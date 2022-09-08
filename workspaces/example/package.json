@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "raven": "*",
-    "raven-plugin-auth": "*",
+    "raven-plugin-koa": "*",
+    "raven-plugin-koa-auth": "*",
+    "raven-plugin-sequelize": "*",
     "sqlite3": "^5.0.11"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
+import { Plugin } from 'raven/src/plugin/plugin'
 import { constructor } from 'tsyringe/dist/typings/types'
-import { Plugin } from '../plugin/plugin'
 import { createAnnotation } from './create-annotation'
 
 export function pluginInitializedValidator(plugin: constructor<Plugin>) {
