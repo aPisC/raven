@@ -1,5 +1,5 @@
 import * as Jwt from 'jsonwebtoken'
-import { injectable } from 'raven'
+import { injectable } from 'tsyringe'
 
 @injectable()
 export default class AuthService {

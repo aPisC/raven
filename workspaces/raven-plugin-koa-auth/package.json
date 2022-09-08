@@ -12,7 +12,8 @@
     "jsonwebtoken": "^8.5.1",
     "koa-jwt": "^4.0.3",
     "raven": "*",
-    "raven-plugin-koa": "*"
+    "raven-plugin-koa": "*",
+    "tsyringe": "*"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.9",

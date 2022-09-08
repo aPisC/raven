@@ -1,4 +1,3 @@
-import { Context, Next } from 'raven'
 import { Middleware } from 'raven-plugin-koa'
 import { AuthorizeSymbol } from './authorize'
 
@@ -7,7 +6,7 @@ export class AuthMiddleware extends Middleware {
     super()
   }
 
-  protected execute(ctx: Context, next: Next) {
+  protected execute(ctx: any, next: Function) {
     if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message != 'jwt must be provided')
       ctx.throw(400, ctx.state.jwtOriginalError)
 
