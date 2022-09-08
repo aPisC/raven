@@ -1,19 +1,19 @@
 import { Raven } from './raven'
 
+type Hook = (raven: Raven) => void
+
 export class RavenHooks {
   constructor(private readonly raven: Raven) {}
 
-  public readonly initialize = new SingleRunHookCollection(this.raven)
+  public readonly initialize = new HookCollection(this.raven)
   public readonly start = new HookCollection(this.raven)
   public readonly listen = new HookCollection(this.raven)
 }
 
 class HookCollection {
-  /**
-   *
-   */
-  constructor(public readonly raven: Raven) {}
   private hooks: Hook[] = []
+
+  constructor(public readonly raven: Raven) {}
 
   add(hook: Hook) {
     this.hooks.push(hook)
@@ -29,12 +29,3 @@ class HookCollection {
     this.hooks = []
   }
 }
-
-class SingleRunHookCollection extends HookCollection {
-  override async execute(): Promise<void> {
-    await super.execute()
-    super.clear()
-  }
-}
-
-type Hook = (raven: Raven) => void

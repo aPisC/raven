@@ -2,13 +2,14 @@ import 'reflect-metadata'
 
 import { container as globalDependencyContainer, injectable } from 'tsyringe'
 import { constructor } from 'tsyringe/dist/typings/types'
+import { ConfigLoaderPlugin } from '../config/config-loader-plugin'
 import { ConfigObjectProvider } from '../config/config-object-provider'
 import { ConfigProvider } from '../config/config-provider'
-import { ConfigLoaderPlugin } from '../core/config-loader-plugin'
+import { RavenLoader } from '../loader/loader'
+import { RavenLoaderConfig } from '../loader/types'
 import { Plugin } from '../plugin/plugin'
 import { PluginManager } from '../plugin/plugin-manager'
 import { RavenHooks } from './hooks'
-import { RavenLoader, RavenLoaderConfig } from './loader'
 
 @injectable()
 export class Raven {
@@ -28,20 +29,6 @@ export class Raven {
     // Register dependency instances
     this.dependencyContainer.register(Raven, { useFactory: () => this })
   }
-
-  /**
-   * Dependency registration
-   */
-  /*useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {
-    this.koa.useKoaMiddleware(priority, middleware)
-  }
-
-  useMiddleware(priority: MiddlewarePriority, middleware: constructor<Middleware>): void
-  useMiddleware(priority: MiddlewarePriority, middleware: Middleware): void
-  useMiddleware(priority: MiddlewarePriority, middleware: FactoryProvider<Middleware>): void
-  useMiddleware(priority: MiddlewarePriority, middleware: any) {
-    this.koa.useMiddleware(priority, middleware)
-  }*/
 
   useService<T extends Object>(ctor: constructor<T>, service?: T | (() => T)) {
     if (!service) this.dependencyContainer.register(ctor, ctor)

@@ -25,7 +25,7 @@ server.usePlugin(RavenPluginKoa).configure((opt, config) => {
 // Load loacal components
 server.loadFiles({
   root: __dirname,
-  controllers: ['controllers/*.{js,ts}'],
+  controllers: ['controllers/*'],
   models: ['models/*.{js,ts}'],
   config: ['../config/config.yaml', `../config/config.${process.env['NODE_ENV'] || 'development'}.yaml`],
 })
