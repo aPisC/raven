@@ -5,6 +5,7 @@ export class RavenHooks {
 
   public readonly initialize = new SingleRunHookCollection(this.raven)
   public readonly start = new HookCollection(this.raven)
+  public readonly listen = new HookCollection(this.raven)
 }
 
 class HookCollection {

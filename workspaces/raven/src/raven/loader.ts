@@ -1,22 +1,23 @@
-import fs from 'fs'
 import glob from 'glob'
-import YAML from 'yaml'
-import { Raven } from './raven'
 
-const loaders: { [key: string]: null | ((file: string) => any) } = {
+/*const __loaders: { [key: string]: null | ((file: string) => any) } = {
   '.js': require,
   '.ts': require,
   '.d.ts': null,
   '.json': require,
   '.yml': (file: string) => YAML.parse(fs.readFileSync(file, 'utf8')),
   '.yaml': (file: string) => YAML.parse(fs.readFileSync(file, 'utf8')),
+}*/
+
+const defaultRequireMap: RequireMap = {
+  '.js': require,
+  '.ts': require,
+  '.d.ts': null,
 }
 
 export interface RavenLoaderConfig {
-  controllers?: string[]
-  models?: string[]
-  config?: string[]
   root?: string
+  [key: string]: string[] | string | undefined
 }
 
 export interface ModuleEntry {
@@ -24,9 +25,57 @@ export interface ModuleEntry {
   module: any
 }
 
+type RegisterFn = (module: any, file: string, err: Error | null) => void
+
+interface RequireMap {
+  [ext: string]: null | ((file: string) => any)
+}
+
+interface LoaderHandler {
+  register: RegisterFn
+  require: (fn: string) => any
+}
+
 export class RavenLoader {
-  public load(raven: Raven, config: RavenLoaderConfig) {
-    if (config.controllers?.length) {
+  private readonly loaders: { [key: string]: LoaderHandler } = {}
+
+  useLoader(key: string, registerModule: null): void
+  useLoader(key: string, registerModule: RegisterFn, requireMap?: RequireMap): void
+  useLoader(key: string, registerModule: null | RegisterFn, requireMap: RequireMap = defaultRequireMap) {
+    if (!registerModule) return delete this.loaders[key]
+
+    this.loaders[key] = {
+      require: createRequireFn(requireMap),
+      register: registerModule,
+    }
+  }
+
+  public load(config: RavenLoaderConfig) {
+    const { root, ...sections } = config
+
+    Object.keys(sections).forEach((section) => {
+      if (!sections[section]) return
+      if (!this.loaders[section]) throw new Error(`Loader not found for ${section}`)
+
+      const globs: string[] =
+        typeof sections[section] === 'string' ? [sections[section] as string] : (sections[section] as string[])
+      const files = globs.flatMap((p) => glob.sync(p, { cwd: root })).map((f) => (root ? `${root}/${f}` : f))
+
+      files.forEach((file) => {
+        let module: any = null
+        let error: Error | null = null
+
+        try {
+          module = this.loaders[section].require(file)
+        } catch (err: any) {
+          error = err
+        }
+
+        this.loaders[section].register(module, file, error)
+      })
+    })
+
+    /*if (config.controllers?.length) {
       const controllers = this.loadModules(config.controllers, config.root)
       controllers.forEach(({ module, file }) => {
         try {
@@ -63,10 +112,10 @@ export class RavenLoader {
           console.warn('Unable to load config', file, err)
         }
       })
-    }
+    }*/
   }
 
-  private loadModules(globs: string[], root?: string): ModuleEntry[] {
+  /*private loadModules(globs: string[], root?: string): ModuleEntry[] {
     const modules: any[] = []
     const files = globs.flatMap((p) => glob.sync(p, { cwd: root })).map((f) => (root ? `${root}/${f}` : f))
 
@@ -80,17 +129,19 @@ export class RavenLoader {
     })
 
     return modules
-  }
+  }*/
 }
 
-function loadFile(file: string): any {
-  const loaderName = Object.keys(loaders)
-    .sort((a, b) => b.length - a.length)
-    .find((ext) => file.endsWith(ext))
-  const loader = loaders[loaderName || '']
-  if (loader === null) return false
-  if (!loader) throw new Error(`Unable to find loader for ${file}`)
+function createRequireFn(loaders: RequireMap) {
+  return (file: string) => {
+    const loaderName = Object.keys(loaders)
+      .sort((a, b) => b.length - a.length)
+      .find((ext) => file.endsWith(ext))
+    const loader = loaders[loaderName || '']
 
-  console.log('Loading', file)
-  return loader(file)
+    if (loader === null) return false
+    if (!loader) throw new Error(`Unable to find loader for ${file}`)
+
+    return loader(file)
+  }
 }

@@ -1,6 +1,8 @@
 export { Context, Next } from 'koa'
 export { Model, Repository, Sequelize } from 'sequelize-typescript'
 export { autoInjectable, inject, injectable } from 'tsyringe'
+export { KoaPlugin } from './core/koa-plugin'
+export { SequelizePlugin } from './core/sequelize-plugin'
 export { KoaMiddleware } from './middleware/koa-middleware'
 export { Middleware } from './middleware/middleware'
 export { MiddlewarePriority } from './middleware/middleware-priority'

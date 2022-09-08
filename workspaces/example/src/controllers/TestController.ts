@@ -6,7 +6,6 @@ import { injectable } from 'tsyringe'
 import TestModel from '../models/TestModel'
 
 @Route.Prefix('/test')
-@Route.Annotate('key', 'value')
 @injectable()
 export default class TestController {
   private model: Repository<TestModel>

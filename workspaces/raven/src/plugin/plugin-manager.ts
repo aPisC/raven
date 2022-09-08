@@ -52,10 +52,22 @@ export class PluginManager {
     if (!(pluginInstance instanceof Plugin)) throw new Error(`Unable to instantiate plugin`)
 
     this.dependencyContainer.registerInstance(pluginConstruct, pluginInstance)
+
+    pluginInstance.onRegister(this.raven)
+
     this.hooks.initialize.add(async () => {
       if (!pluginInstance) return
-      console.log(`Initialize plugin ${pluginName}`)
-      await pluginInstance.initialize(this.raven)
+      await pluginInstance.onInitialize(this.raven)
+    })
+
+    this.hooks.start.add(async () => {
+      if (!pluginInstance) return
+      await pluginInstance.onStart(this.raven)
+    })
+
+    this.hooks.listen.add(async () => {
+      if (!pluginInstance) return
+      await pluginInstance.onListen(this.raven)
     })
 
     return pluginInstance
