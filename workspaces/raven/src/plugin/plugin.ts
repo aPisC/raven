@@ -45,10 +45,11 @@ export abstract class Plugin<TConfig extends Object = any> {
    * Provide configuration for the plugin with callback or config object.
    * Config is resolved in the initialization phase.
    */
-  configure(configure: ConfigHook<TConfig>): void
-  configure(configure: Partial<TConfig>): void
+  configure(configure: ConfigHook<TConfig>): this
+  configure(configure: Partial<TConfig>): this
   configure(configure: ConfigHook<TConfig> | Partial<TConfig>) {
     if (typeof configure === 'function') this.configHooks.push(configure)
     else this.configHooks.push((opt) => Object.assign(opt, configure))
+    return this
   }
 }

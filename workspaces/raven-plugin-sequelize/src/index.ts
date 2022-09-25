@@ -17,8 +17,9 @@ export class RavenPluginSequelize extends Plugin<Config> {
     Object.assign(this.config, defaultConfig)
   }
 
-  useModel(model: typeof Model) {
+  useModel(model: typeof Model): this {
     this.raven.dependencyContainer.registerInstance(ModelsSymbol, model)
+    return this
   }
 
   extend(extender: (sequelizeClass: typeof Sequelize) => typeof Sequelize) {
