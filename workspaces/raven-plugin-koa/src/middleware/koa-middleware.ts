@@ -1,3 +1,3 @@
-import { Context, Next } from "koa";
+import { Context, Next } from 'koa'
 
-export type KoaMiddleware = (ctx: Context, next: Next) => any;
+export type KoaMiddleware = (ctx: Context, next: Next) => any

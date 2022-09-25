@@ -1,3 +1,3 @@
-export const RoutesSymbol = Symbol();
-export const ConfigSymbol = Symbol();
-export const AnnotationsSymbol = Symbol();
+export const RoutesSymbol = Symbol()
+export const ConfigSymbol = Symbol()
+export const AnnotationsSymbol = Symbol()
