@@ -36,6 +36,6 @@ jobs:
           node-version: 16
           registry-url: https://nexus.thor.akromentos.com/repository/npm-hosted/
           always-auth: true
-      - run: yarn workspaces publish
+      - run: yarn workspaces run publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
