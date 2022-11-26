@@ -31,6 +31,6 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: yarn
       - run: yarn build
-      - run: yarn publish --registry https://nexus.thor.akromentos.com/repository/npm-hosted/
+      - run: yarn workspace raven publish --registry https://nexus.thor.akromentos.com/repository/npm-hosted/
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
