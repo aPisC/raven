@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "raven-plugin-koa-auth",
   "version": "1.0.0",
   "main": "dist/index.js",
@@ -7,7 +6,8 @@
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -w",
-    "set-version": "yarn version  --no-git-tag-version --new-version"
+    "ci-version": "yarn version  --no-git-tag-version --new-version",
+    "ci-publish":"yarn publish --new-version"
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
