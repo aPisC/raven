@@ -34,4 +34,4 @@ jobs:
           always-auth: true
       - run: yarn
       - run: yarn workspace raven build
-      - run: yarn workspace raven publish --new-version $GITHUB_REF_NAME
+      - run: yarn workspace raven publish --no-git-tag-version --new-version $GITHUB_REF_NAME
