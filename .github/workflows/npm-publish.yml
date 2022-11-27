@@ -29,7 +29,6 @@ jobs:
         with:
           node-version: 16
           registry-url: https://nexus.thor.akromentos.com/repository/npm/
-          always-auth: true
       - run: yarn
       - run: yarn build
       - run: yarn workspace raven publish
