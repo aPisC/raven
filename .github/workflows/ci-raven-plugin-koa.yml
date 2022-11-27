@@ -1,7 +1,6 @@
 name: Publish raven-plugin-koa
 
 on:
-  workflow_dispatch: 
   release:
     types: [created]
 
