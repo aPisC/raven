@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -w",
-    "set-version": "yarn version  --no-git-tag-version --new-version",
+    "ci-version": "yarn version  --no-git-tag-version --new-version",
     "ci-publish": "yarn publish --new-version"
   },
   "dependencies": {
