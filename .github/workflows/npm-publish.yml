@@ -33,5 +33,6 @@ jobs:
           registry-url: https://nexus.thor.akromentos.com/repository/npm/
           always-auth: true
       - run: yarn
+      - run: yarn workspaces run set-version $GITHUB_REF_NAME
       - run: yarn build
       - run: yarn workspace raven publish
