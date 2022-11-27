@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -w",
-    "version": "yarn version"
+    "set-version": "yarn version  --no-git-tag-version --new-version"
   },
   "dependencies": {
     "joi": "^17.6.0",
@@ -18,10 +18,10 @@
     "tsyringe": "*"
   },
   "devDependencies": {
-    "typescript": "^4.7.4",
     "@types/joi": "^17.2.3",
     "@types/koa": "^2.13.4",
     "@types/koa-bodyparser": "^4.3.7",
-    "@types/koa-router": "^7.4.4"
+    "@types/koa-router": "^7.4.4",
+    "typescript": "^4.7.4"
   }
 }

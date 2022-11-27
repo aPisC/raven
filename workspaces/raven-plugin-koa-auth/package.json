@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -w",
-    "version": "yarn version"
+    "set-version": "yarn version  --no-git-tag-version --new-version"
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
