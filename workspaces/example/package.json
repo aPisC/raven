@@ -1,7 +1,6 @@
 {
   "private": true,
   "name": "example",
-  "version": "1.0.0",
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -b -w",
