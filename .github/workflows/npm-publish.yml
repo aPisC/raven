@@ -28,14 +28,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-          registry-url: https://registry.npmjs.org
+          registry-url: https://nexus.thor.akromentos.com/repository/npm/
+          always-auth: true
       - run: yarn
       - run: yarn build
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          registry-url: https://nexus.thor.akromentos.com/repository/npm-hosted/
-          always-auth: true
-      - run: yarn workspaces run publish
+      - run: yarn workspace raven publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
