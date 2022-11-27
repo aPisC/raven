@@ -6,7 +6,8 @@
     "build": "tsc -b",
     "watch": "tsc -b -w",
     "dev": "nodemon ./src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "version": "yarn version"
   },
   "dependencies": {
     "raven": "*",

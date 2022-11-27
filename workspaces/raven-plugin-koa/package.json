@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "version": "yarn version"
   },
   "dependencies": {
     "joi": "^17.6.0",

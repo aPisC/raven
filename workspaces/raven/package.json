@@ -10,7 +10,8 @@
     "start": "echo done",
     "build": "tsc -b",
     "watch": "tsc -w",
-    "test": "jest"
+    "test": "jest",
+    "version": "yarn version"
   },
   "dependencies": {
     "flattenizer": "^1.1.1",
