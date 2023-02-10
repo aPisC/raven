@@ -1,5 +1,5 @@
 export { Middleware } from './middleware/middleware'
 export { MiddlewarePriority } from './middleware/middleware-priority'
-export { RavenPluginKoa } from './plugin'
+export { RavenKoaPlugin } from './Plugin'
 export { Route } from './route'
 export { Validate } from './validate'

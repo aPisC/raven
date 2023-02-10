@@ -1,6 +1,6 @@
-import { Raven } from './raven'
+import { Raven } from './Raven'
 
-type Hook = (raven: Raven) => void
+type Hook = (raven: Raven) => Promise<void> | void
 
 export class RavenHooks {
   constructor(private readonly raven: Raven) {}

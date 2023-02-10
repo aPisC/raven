@@ -1,6 +1,6 @@
-import { flatten } from 'flattenizer'
-import { ConfigProvider } from './config-provider'
-import { ConfigSectionProvider } from './config-section-provider'
+import { flatten, unflatten } from 'flattenizer'
+import { ConfigProvider } from './ConfigProvider'
+import { ConfigSectionProvider } from './ConfigSectionProvider'
 
 interface ConfigStore {
   [key: string]: any
@@ -62,5 +62,13 @@ export class ConfigObjectProvider extends ConfigProvider {
     const value = this.get(key)
     if (value == null) throw new Error(`${key} is not configured`)
     return value
+  }
+
+  getKeys(): string[] {
+    return Object.keys(this._values)
+  }
+
+  getObject(): any {
+    return unflatten(this._values)
   }
 }

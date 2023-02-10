@@ -1,26 +1,32 @@
 import { Raven } from 'raven'
-import { RavenPluginKoa } from 'raven-plugin-koa'
-import RavenPluginKoaAuth from 'raven-plugin-koa-auth'
-import { RavenPluginSequelize } from 'raven-plugin-sequelize'
+import { RavenKoaPlugin } from 'raven-plugin-koa'
+import RavenJWTAuthPlugin from 'raven-plugin-koa-auth'
+import { RavenSequelizePlugin } from 'raven-plugin-sequelize'
 
 const server = new Raven()
 
-// Database
-server.usePlugin(RavenPluginSequelize).configure({
-  dialect: 'sqlite',
-  storage: ':memory:',
+server.configure({
+  database: {
+    dialect: 'sqlite',
+    storage: ':memory:',
+  },
+  auth: {
+    passthrough: true,
+    defaultAuthorized: false,
+    secret: 'jwt-secret',
+  },
+  server: {
+    port: 3000,
+  },
 })
+
+// Database
+server.usePlugin(RavenSequelizePlugin).configureFrom('database')
 
 // Web engine and authorization
-server.usePlugin(RavenPluginKoaAuth).configure({
-  blockWithoutToken: false,
-  defaultAuthorized: false,
-  secret: 'jwt-secret',
-})
+server.usePlugin(RavenKoaPlugin).configureFrom('server')
 
-server.usePlugin(RavenPluginKoa).configure((opt, config) => {
-  opt.port = config.getRequired('server.port')
-})
+server.usePlugin(RavenJWTAuthPlugin).configureFrom('auth')
 
 // Load loacal components
 server.loadFiles({

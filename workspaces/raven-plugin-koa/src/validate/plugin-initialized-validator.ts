@@ -1,10 +1,10 @@
-import { Plugin } from 'raven/src/plugin/plugin'
+import { Plugin } from 'raven'
 import { constructor } from 'tsyringe/dist/typings/types'
 import { createAnnotation } from './create-annotation'
 
 export function pluginInitializedValidator(plugin: constructor<Plugin>) {
   const cache = { success: false }
-  return createAnnotation((ctx, raven) => {
+  return createAnnotation((_, raven) => {
     if (cache.success) return
     if (!raven.dependencyContainer.isRegistered(plugin)) {
       console.error(`${plugin.name} is not initialized`)

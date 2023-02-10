@@ -2,18 +2,14 @@ import 'reflect-metadata'
 
 import { container as globalDependencyContainer, injectable } from 'tsyringe'
 import { constructor } from 'tsyringe/dist/typings/types'
-import { ConfigLoaderPlugin } from '../config/config-loader-plugin'
-import { ConfigObjectProvider } from '../config/config-object-provider'
-import { ConfigProvider } from '../config/config-provider'
-import { RavenLoader } from '../loader/loader'
-import { RavenLoaderConfig } from '../loader/types'
-import { Plugin } from '../plugin/plugin'
-import { PluginManager } from '../plugin/plugin-manager'
-import { RavenHooks } from './hooks'
+import { RavenConfigPlugin } from '../config/ConfigPlugin'
+import { RavenLoader, RavenLoaderConfig } from '../loader/Loader'
+import { Plugin } from '../plugin/Plugin'
+import { PluginManager } from '../plugin/PluginManager'
+import { RavenHooks } from './Hooks'
 
 @injectable()
 export class Raven {
-  public readonly config: ConfigProvider = new ConfigObjectProvider()
   public readonly hooks: RavenHooks = new RavenHooks(this)
   public readonly loader: RavenLoader = new RavenLoader()
 
@@ -24,7 +20,7 @@ export class Raven {
   constructor() {
     this.pluginManager = new PluginManager(this)
 
-    this.pluginManager.usePlugin(new ConfigLoaderPlugin())
+    this.pluginManager.usePlugin(new RavenConfigPlugin(this))
 
     // Register dependency instances
     this.dependencyContainer.register(Raven, { useFactory: () => this })
@@ -37,7 +33,7 @@ export class Raven {
     else throw new Error('Unable to register service')
   }
 
-  usePlugin<TPlugin extends Plugin = Plugin>(plugin: TPlugin | constructor<TPlugin> | string): TPlugin {
+  usePlugin<TPlugin extends Plugin = Plugin>(plugin: TPlugin | constructor<TPlugin>): TPlugin {
     return this.pluginManager.usePlugin(plugin)
   }
 
@@ -50,5 +46,13 @@ export class Raven {
     await this.hooks.initialize.execute()
     await this.hooks.start.execute()
     await this.hooks.listen.execute()
+  }
+
+  resolve<T>(ctor: constructor<T>): T {
+    return this.dependencyContainer.resolve(ctor)
+  }
+
+  configure(config: Record<string, any>) {
+    this.resolve(RavenConfigPlugin).provider.set(config)
   }
 }

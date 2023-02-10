@@ -8,37 +8,32 @@ import { ExecuteEndpointMiddleware } from './middleware/execute-endpoint-middlew
 import { KoaMiddleware } from './middleware/koa-middleware'
 import { Middleware } from './middleware/middleware'
 import { MiddlewarePriority } from './middleware/middleware-priority'
-
 import { Plugin, Raven } from 'raven'
 import { Route } from './route'
 import { ValidateMiddleware } from './validate/validate-middleware'
-
-interface KoaPluginConfig {
-  port: number
-}
-
-const ControllersSymbol = Symbol('Controllers')
+import { FileLoader } from './FileLoader'
 
 @injectable()
-export class RavenPluginKoa extends Plugin<KoaPluginConfig> {
-  private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
-  private readonly raven: Raven
+export class RavenKoaPlugin extends Plugin {
+  private readonly loader = new FileLoader(this)
+  private readonly container: DependencyContainer
 
-  private Koa: typeof Koa<any, any> = Koa
+  private controllers: symbol[] = []
+  private readonly middlewares: { symbol: symbol; priority: MiddlewarePriority }[] = []
+
+  private KoaCtor: typeof Koa<any, any> = Koa
   private initialized: boolean = false
 
   constructor(raven: Raven) {
-    super()
-    this.raven = raven
+    super(raven)
+    this.container = raven.dependencyContainer
   }
-
-  //#region Resource registration
 
   useKoaMiddleware(priority: MiddlewarePriority, middleware: KoaMiddleware) {
     this.assertUninitialized()
     const middlewareSymbol = Symbol()
 
-    this.raven.dependencyContainer.register(middlewareSymbol, {
+    this.container.register(middlewareSymbol, {
       useValue: middleware,
     })
     this.middlewares.push({ symbol: middlewareSymbol, priority: priority })
@@ -53,8 +48,8 @@ export class RavenPluginKoa extends Plugin<KoaPluginConfig> {
     this.assertUninitialized()
     const middlewareSymbol = Symbol()
 
-    if (middleware instanceof Middleware) this.raven.dependencyContainer.registerInstance(middlewareSymbol, middleware)
-    else this.raven.dependencyContainer.register(middlewareSymbol, middleware)
+    if (middleware instanceof Middleware) this.container.registerInstance(middlewareSymbol, middleware)
+    else this.container.register(middlewareSymbol, middleware)
     this.middlewares.push({ symbol: middlewareSymbol, priority: priority })
 
     return this
@@ -62,31 +57,30 @@ export class RavenPluginKoa extends Plugin<KoaPluginConfig> {
 
   useController(controller: constructor<Object>) {
     this.assertUninitialized()
-    this.raven.dependencyContainer.register(ControllersSymbol, controller)
+
+    const controllerSymbol = Symbol()
+    this.container.register(controllerSymbol, controller)
+    this.controllers.push(controllerSymbol)
 
     return this
   }
 
   extend(extender: (koaClass: typeof Koa) => typeof Koa) {
-    this.Koa = extender(this.Koa)
+    this.KoaCtor = extender(this.KoaCtor)
+    return this
   }
 
   //#endregion
   //#region Plugin registration hooks
 
-  override onRegister(raven: Raven): void {
-    super.onRegister(raven)
+  override onRegister(): void {
+    super.onRegister()
 
-    raven.loader.useLoader('controllers', (mod, file, error) => {
-      console.log(`Loading controller from ${file}...`)
-      if (typeof mod === 'object' && typeof mod.default === 'function') this.useController(mod.default)
-      else if (typeof mod === 'function') this.useController(mod)
-      else console.log(`Unable to register controller from file ${file}. Error: ${error}`)
-    })
+    this.raven.loader.addLoader('controllers', (filename) => this.loader.load(filename))
 
-    this.raven.dependencyContainer.register(Koa, {
+    this.container.register(Koa, {
       useFactory: (dependencyContainer) => {
-        const koa = this.initializeKoaInstance(dependencyContainer)
+        const koa = this.initializeKoaInstance()
         dependencyContainer.registerInstance(Koa, koa)
         this.initialized = true
         return koa
@@ -94,36 +88,33 @@ export class RavenPluginKoa extends Plugin<KoaPluginConfig> {
     })
   }
 
-  override async onStart(raven: Raven): Promise<void> {
+  override async onStart(): Promise<void> {
     // Resolve koa instance
-    raven.dependencyContainer.resolve(Koa)
+    this.container.resolve(Koa)
   }
 
-  override onListen(raven: Raven) {
+  override onListen() {
     // Start http server for koa
-    const koa = raven.dependencyContainer.resolve(Koa)
+    const koa = this.container.resolve(Koa)
     const httpServer = createServer(koa.callback())
-    httpServer.listen(this.config.port || 3000)
+    httpServer.listen(this.config.getRequired('port'))
     console.log('Server started', httpServer.address())
   }
 
-  private initializeKoaInstance(dependencyContainer: DependencyContainer) {
+  private initializeKoaInstance() {
     const router = new Router()
-    const controllers = dependencyContainer.isRegistered(ControllersSymbol)
-      ? dependencyContainer.resolveAll<Object>(ControllersSymbol)
-      : []
-    controllers.forEach((controller) => {
+    const resolvedControllers = this.controllers.map((sym) => this.container.resolve<Object>(sym))
+    resolvedControllers.forEach((controller) => {
       const controllerRouter = Route.CreateRouter(controller)
       router.use(controllerRouter.routes())
     })
 
     // Creating koa server
-    const KoaCtor = this.Koa
-    const koa = new KoaCtor()
+    const koa = new this.KoaCtor()
 
     // Register middlewares
     const resolvedMiddlewares = this.middlewares.map(({ priority, symbol }) => {
-      const middleware = dependencyContainer.resolve<Middleware | KoaMiddleware>(symbol)
+      const middleware = this.container.resolve<Middleware | KoaMiddleware>(symbol)
       const handler = typeof middleware === 'function' ? middleware : middleware.handler
       return { priority, handler }
     })

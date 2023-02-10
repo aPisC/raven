@@ -1,32 +1,25 @@
 import KoaJwt from 'koa-jwt'
-import { Plugin, Raven } from 'raven'
-import { MiddlewarePriority, RavenPluginKoa } from 'raven-plugin-koa'
+import { Plugin } from 'raven'
+import { MiddlewarePriority, RavenKoaPlugin } from 'raven-plugin-koa'
+import { injectable } from 'tsyringe'
 import { AuthMiddleware } from './authMiddleware'
 import { Authorize } from './authorize'
 import AuthService from './authService'
 
-const SETTINGS_ROOT = 'plugins.raven-plugin-auth'
+@injectable()
+export default class RavenJWTAuthPlugin extends Plugin {
+  override onInitialize(): void {
+    const secret: string = this.config.getRequired('secret')
+    const passthrough: boolean = this.config.get('blockWithoutToken', true)
+    const defaultAuthorized: boolean = this.config.get('defaultAuthorized', false)
 
-interface RavenAuthPluginConfiguration {
-  secret: string
-  blockWithoutToken: boolean
-  defaultAuthorized: boolean
-}
+    this.raven.dependencyContainer
+      .resolve(RavenKoaPlugin)
+      .useKoaMiddleware(MiddlewarePriority.PostIngress, KoaJwt({ secret, passthrough: passthrough }))
+      .useMiddleware(MiddlewarePriority.PostRouting, new AuthMiddleware(defaultAuthorized))
 
-export default class RavenPluginKoaAuth extends Plugin<RavenAuthPluginConfiguration> {
-  override onInitialize(raven: Raven): void {
-    super.onInitialize(raven)
-    const secret: string = this.config.secret || ''
-
-    if (!secret) throw new Error('Jwt secret must be configured')
-
-    raven.dependencyContainer
-      .resolve(RavenPluginKoa)
-      .useKoaMiddleware(MiddlewarePriority.PostIngress, KoaJwt({ secret, passthrough: !this.config.blockWithoutToken }))
-      .useMiddleware(MiddlewarePriority.PostRouting, new AuthMiddleware(!!this.config.defaultAuthorized))
-
-    raven.useService(AuthService, new AuthService(secret))
+    this.raven.useService(AuthService, new AuthService(secret))
   }
 }
 
-export { AuthService, Authorize, RavenPluginKoaAuth }
+export { AuthService, Authorize, RavenJWTAuthPlugin }

@@ -1,2 +1,4 @@
-export { Plugin } from './plugin/plugin'
-export { Raven } from './raven/raven'
+import 'reflect-metadata'
+
+export { Plugin } from './plugin/Plugin'
+export { Raven } from './raven/Raven'

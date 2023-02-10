@@ -1,5 +1,6 @@
 {
   "private": true,
+  "version": "0.0.0",
   "name": "example",
   "scripts": {
     "build": "tsc -b",
@@ -7,7 +8,7 @@
     "dev": "nodemon ./src/index.ts",
     "start": "node dist/index.js",
     "ci-version": "yarn version  --no-git-tag-version --new-version",
-    "ci-publish":"exit 0"
+    "ci-publish": "exit 0"
   },
   "dependencies": {
     "raven": "*",
