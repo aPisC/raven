@@ -3,7 +3,7 @@ import { Plugin } from 'raven'
 import { MiddlewarePriority, RavenKoaPlugin } from 'raven-plugin-koa'
 import { injectable } from 'tsyringe'
 import { AuthMiddleware } from './authMiddleware'
-import { Authorize } from './authorize'
+import { Authorize, RequireScope } from './Decorators'
 import AuthService from './authService'
 
 @injectable()
@@ -22,4 +22,4 @@ export default class RavenJWTAuthPlugin extends Plugin {
   }
 }
 
-export { AuthService, Authorize, RavenJWTAuthPlugin }
+export { AuthService, Authorize, RequireScope, RavenJWTAuthPlugin }

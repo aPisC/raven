@@ -1,8 +1,9 @@
 import { Route } from 'raven-plugin-koa'
-import { Authorize, AuthService } from 'raven-plugin-koa-auth'
+import { Authorize, AuthService, RequireScope } from 'raven-plugin-koa-auth'
 import { Repository, Sequelize } from 'sequelize-typescript'
 import { injectable } from 'tsyringe'
 import TestModel from '../models/TestModel'
+import { Context } from 'koa'
 
 @Route.Prefix('/test')
 @injectable()
@@ -15,8 +16,9 @@ export default class TestController {
 
   @Route.Get('/')
   @Authorize()
-  async index() {
-    console.log('first')
+  @RequireScope('test-scope')
+  async index(ctx: Context) {
+    console.log('first', ctx.state)
     return 'HelloWorld'
   }
 
@@ -30,6 +32,6 @@ export default class TestController {
   @Route.Get('/login')
   @Authorize(false)
   async login() {
-    return this.authService.createJwt({ userId: 10, name: 'test' })
+    return this.authService.createJwt({ userId: 10, name: 'test', scopes: ['test-scope'] })
   }
 }

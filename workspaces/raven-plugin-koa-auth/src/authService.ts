@@ -1,6 +1,11 @@
 import * as Jwt from 'jsonwebtoken'
 import { injectable } from 'tsyringe'
 
+export interface AuthData {
+  userId: number
+  scopes: string[]
+}
+
 @injectable()
 export default class AuthService {
   private readonly secret: string
@@ -9,7 +14,7 @@ export default class AuthService {
     this.secret = secret
   }
 
-  createJwt(payload: any) {
+  createJwt<TAuthData extends AuthData>(payload: TAuthData) {
     return Jwt.sign(payload, this.secret, {})
   }
 }
