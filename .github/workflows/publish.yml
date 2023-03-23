@@ -1,24 +1,42 @@
 name: Publish
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*"
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.6.0
         with:
-          always-auth: true
           node-version: 16
-          registry-url: ${{ secrets.MY_SECRET }}
-          token: ${{ secrets.MY_SECRET }}
-          cache: yarn
-          cache-dependency-path: yarn.lock
+      - name: Set npm repository credentials
+        run: |
+          npm config set registry=${{ vars.NPM_REGISTRY }}
+          npm config set _auth=${{ secrets.NPM_TOKEN }}
+          npm config set email=${{ vars.NPM_EMAIL }}
+          npm config set always-auth=true
+          yarn config set registry ${{ vars.NPM_REGISTRY }}
+
       - name: Get Release Tag
         id: get-tag
         run: echo ::set-output name=tag::$(echo $GITHUB_REF | sed 's/refs\/tags\/v//')
-      - name: Print current tag
-        run: echo ${{ steps.get-tag.outputs.tag }}
+
+      - name: Update versions in package.json files
+        run: .github/scripts/update-versions.sh
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build workspaces
+        run: yarn build
+        
+      - name: Test projects
+        run: yarn test
+
+      - name: Publish
+        run: yarn workspaces run ci-publish ${{ steps.get-tag.outputs.tag }}

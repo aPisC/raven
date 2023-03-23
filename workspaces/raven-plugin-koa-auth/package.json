@@ -7,7 +7,7 @@
     "build": "tsc -b",
     "watch": "tsc -w",
     "ci-version": "yarn version  --no-git-tag-version --new-version",
-    "ci-publish":"yarn publish --new-version"
+    "ci-publish":"yarn publish --no-git-tag-version --new-version"
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
