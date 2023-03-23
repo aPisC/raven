@@ -1,1 +1,24 @@
+name: Publish
 
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          always-auth: true
+          node-version: true
+          registry-url: ${{ secrets.MY_SECRET }}
+          token: ${{ secrets.MY_SECRET }}
+          cache: yarn
+          cache-dependency-path: yarn.lock
+      - name: Get Release Tag
+        id: get-tag
+        run: echo ::set-output name=tag::$(echo $GITHUB_REF | sed 's/refs\/tags\/v//')
+      - name: Print current tag
+        run: echo ${{ steps.get-tag.outputs.tag }}
