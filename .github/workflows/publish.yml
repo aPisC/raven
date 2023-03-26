@@ -30,7 +30,7 @@ jobs:
         run: .github/scripts/update-versions.sh
 
       - name: Install dependencies
-        run: npm install
+        run: yarn
 
       - name: Build workspaces
         run: yarn build
